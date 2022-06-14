@@ -379,8 +379,8 @@ function parseBuyStoreOffer(playerId, msg)
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_POUNCH         then GameStore.processItemPurchase(player, offer.itemtype, offer.count)
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_INSTANT_REWARD_ACCESS then GameStore.processInstantRewardAccess(player, offer.count)
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_CHARMS         then GameStore.processCharmsPurchase(player)
-		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_BLESSINGS      then GameStore.processSignleBlessingPurchase(player, offer.blessid, offer.count)
-		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_ALLBLESSINGS   then GameStore.processAllBlessingsPurchase(player, offer.count)
+		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_BLESSINGS      then --GameStore.processSignleBlessingPurchase(player, offer.blessid, offer.count)
+		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_ALLBLESSINGS   then --GameStore.processAllBlessingsPurchase(player, offer.count)
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_PREMIUM        then GameStore.processPremiumPurchase(player, offer.id)
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_STACKABLE      then GameStore.processStackablePurchase(player, offer.itemtype, offer.count, offer.name)
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_HOUSE          then GameStore.processHouseRelatedPurchase(player, offer.itemtype, offer.count)
@@ -536,18 +536,11 @@ function Player.canBuyOffer(self, offer)
 				disabledReason = "You already have Loot Pouch."
 			end
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_BLESSINGS then
-			if self:getBlessingCount(offer.blessid) >= 5 then
-				disabled = 1
-				disabledReason = "You reached the maximum amount for this blessing."
-			end
+			--disabled = 1
+			--disabledReason = "You reached the maximum amount for this blessing."
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_ALLBLESSINGS then
-			for i = 1, 8 do
-				if self:getBlessingCount(i) >= 5 then
-					disabled = 1
-					disabledReason = "You already have all Blessings."
-					break
-				end
-			end
+			--disabled = 1
+			--disabledReason = "You already have all Blessings."
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_OUTFIT or offer.type == GameStore.OfferTypes.OFFER_TYPE_OUTFIT_ADDON then
 			local outfitLookType
 			if self:getSex() == PLAYERSEX_MALE then
@@ -810,7 +803,7 @@ function sendShowStoreOffers(playerId, category, redirectId)
 				msg:addByte(0)
 			end
 
-			msg:addU16(0) -- Products Capacity (unnused)
+			msg:addU16(0x00) -- Products Capacity (unnused)
 		end
 	end
 
@@ -1261,18 +1254,11 @@ function GameStore.processChargesPurchase(player, itemtype, name, charges)
 end
 
 function GameStore.processSignleBlessingPurchase(player, blessId, count)
-	player:addBlessing(blessId, count)
+	
 end
 
 function GameStore.processAllBlessingsPurchase(player, count)
-	player:addBlessing(1, count)
-	player:addBlessing(2, count)
-	player:addBlessing(3, count)
-	player:addBlessing(4, count)
-	player:addBlessing(5, count)
-	player:addBlessing(6, count)
-	player:addBlessing(7, count)
-	player:addBlessing(8, count)
+	
 end
 
 function GameStore.processInstantRewardAccess(player, offerCount)

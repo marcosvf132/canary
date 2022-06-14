@@ -10,9 +10,6 @@
 	<module type="recvbyte" byte="253" script="gamestore/gamestore.lua"/>
 	<module type="recvbyte" byte="254" script="gamestore/gamestore.lua"/>
 
-	<!-- Blessings -->
-	<module type="recvbyte" byte="207" script="blessings/blessings.lua" />
-
 	<!-- Quest Tracking -->
 	<module type="recvbyte" byte="208" script="questtrack/questtrack.lua"/>
 

@@ -216,11 +216,6 @@ class PlayerFunctions final : LuaScriptInterface {
 			registerMethod(L, "Player", "addTibiaCoins", PlayerFunctions::luaPlayerAddTibiaCoins);
 			registerMethod(L, "Player", "removeTibiaCoins", PlayerFunctions::luaPlayerRemoveTibiaCoins);
 
-			registerMethod(L, "Player", "hasBlessing", PlayerFunctions::luaPlayerHasBlessing);
-			registerMethod(L, "Player", "addBlessing", PlayerFunctions::luaPlayerAddBlessing);
-			registerMethod(L, "Player", "removeBlessing", PlayerFunctions::luaPlayerRemoveBlessing);
-			registerMethod(L, "Player", "getBlessingCount", PlayerFunctions::luaPlayerGetBlessingCount);
-
 			registerMethod(L, "Player", "canLearnSpell", PlayerFunctions::luaPlayerCanLearnSpell);
 			registerMethod(L, "Player", "learnSpell", PlayerFunctions::luaPlayerLearnSpell);
 			registerMethod(L, "Player", "forgetSpell", PlayerFunctions::luaPlayerForgetSpell);
@@ -467,12 +462,6 @@ class PlayerFunctions final : LuaScriptInterface {
 		static int luaPlayerGetTibiaCoins(lua_State* L);
 		static int luaPlayerAddTibiaCoins(lua_State* L);
 		static int luaPlayerRemoveTibiaCoins(lua_State* L);
-
-		static int luaPlayerHasBlessing(lua_State* L);
-		static int luaPlayerAddBlessing(lua_State* L);
-		static int luaPlayerRemoveBlessing(lua_State* L);
-
-		static int luaPlayerGetBlessingCount(lua_State * L);
 
 		static int luaPlayerCanLearnSpell(lua_State* L);
 		static int luaPlayerLearnSpell(lua_State* L);

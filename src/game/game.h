@@ -25,7 +25,6 @@
 #include "creatures/players/account/account.hpp"
 #include "creatures/combat/combat.h"
 #include "items/containers/container.h"
-#include "game/gamestore.h"
 #include "creatures/players/grouping/groups.h"
 #include "io/iobestiary.h"
 #include "items/item.h"
@@ -369,12 +368,6 @@ class Game
 		void playerCreateMarketOffer(uint32_t playerId, uint8_t type, uint16_t itemId, uint16_t amount, uint32_t price, bool anonymous);
 		void playerCancelMarketOffer(uint32_t playerId, uint32_t timestamp, uint16_t counter);
 		void playerAcceptMarketOffer(uint32_t playerId, uint32_t timestamp, uint16_t counter, uint16_t amount);
-		void playerStoreOpen(uint32_t playerId, uint8_t serviceType);
-		void playerShowStoreCategoryOffers(uint32_t playerId, StoreCategory* category);
-		void playerBuyStoreOffer(uint32_t playerId, uint32_t offerId, uint8_t productType, const std::string& additionalInfo="");
-		void playerCoinTransfer(uint32_t playerId, const std::string& receiverName, uint32_t amount);
-		void playerStoreTransactionHistory(uint32_t playerId, uint32_t page);
-
 		void parsePlayerExtendedOpcode(uint32_t playerId, uint8_t opcode, const std::string& buffer);
 
 		std::forward_list<Item*> getMarketItemList(uint16_t wareId, uint16_t sufficientCount, DepotLocker* depotLocker);
@@ -498,7 +491,6 @@ class Game
 		Map map;
 		Mounts mounts;
 		Raids raids;
-		GameStore gameStore;
 		Canary::protobuf::appearances::Appearances appearances;
 
 		std::unordered_set<Tile*> getTilesToClean() const {

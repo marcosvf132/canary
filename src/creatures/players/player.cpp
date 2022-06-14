@@ -2623,37 +2623,9 @@ void Player::death(Creature* lastHitCreature)
 		}
 		sendTextMessage(MESSAGE_EVENT_ADVANCE, deathType.str());
 
-		std::string bless = getBlessingsName();
-		std::ostringstream blesses;
-		if (bless.length() == 0) {
-			blesses << "You weren't protected with any blessings.";
-		} else {
-			blesses << "You were blessed with " << bless;
-		}
-		sendTextMessage(MESSAGE_EVENT_ADVANCE, blesses.str());
-
-		//Make player lose bless
-		uint8_t maxBlessing = 8;
-		if (pvpDeath && hasBlessing(1)) {
-			removeBlessing(1, 1); //Remove TOF only
-		} else {
-			for (int i = 2; i <= maxBlessing; i++) {
-				removeBlessing(i, 1);
-			}
-		}
-
-		std::ostringstream lostBlesses;
-		if (bless.length() == 0) {
-			lostBlesses << "You lost all your blesses.";
-		} else {
-			lostBlesses << "You are still blessed with " << bless;
-		}
-		sendTextMessage(MESSAGE_EVENT_ADVANCE, lostBlesses.str());
-
 		sendStats();
 		sendSkills();
 		sendReLoginWindow(unfairFightReduction);
-		sendBlessStatus();
 		if (getSkull() == SKULL_BLACK) {
 			health = 40;
 			mana = 0;
@@ -4852,21 +4824,12 @@ bool Player::isPromoted() const
 
 double Player::getLostPercent() const
 {
-	int32_t blessingCount = 0;
-	uint8_t maxBlessing = (operatingSystem == CLIENTOS_NEW_WINDOWS || operatingSystem == CLIENTOS_NEW_MAC) ? 8 : 6;
-	for (int i = 2; i <= maxBlessing; i++) {
-		if (hasBlessing(i)) {
-			blessingCount++;
-		}
-	}
-
 	int32_t deathLosePercent = g_configManager().getNumber(DEATH_LOSE_PERCENT);
 	if (deathLosePercent != -1) {
 		if (isPromoted()) {
 			deathLosePercent -= 3;
 		}
 
-		deathLosePercent -= blessingCount;
 		return std::max<int32_t>(0, deathLosePercent) / 100.;
 	}
 
@@ -4883,7 +4846,6 @@ double Player::getLostPercent() const
 		percentReduction += 30;
 	}
 
-	percentReduction += blessingCount * 8;
 	return lossPercent * (1 - (percentReduction / 100.)) / 100.;
 }
 
@@ -5860,39 +5822,6 @@ void Player::initializeTaskHunting()
 	if (client && g_configManager().getBoolean(TASK_HUNTING_ENABLED)) {
 		client->writeToOutputBuffer(g_ioprey().GetTaskHuntingBaseDate());
 	}
-}
-
-std::string Player::getBlessingsName() const
-{
-	uint8_t count = 0;
-	std::for_each(blessings.begin(), blessings.end(), [&count](uint8_t amount) {
-		if (amount != 0) {
-			count++;
-		}
-	});
-
-	std::ostringstream os;
-	for (uint8_t i = 1; i <= 8; i++) {
-		if (hasBlessing(i)) {
-			if (auto blessName = BlessingNames.find(static_cast<Blessings_t>(i)); 
-			blessName != BlessingNames.end()) {
-				os << (*blessName).second;
-			} else {
-				continue;
-			}
-
-			--count;
-			if (count > 1) {
-				os << ", ";
-			} else if (count == 1) {
-				os << " and ";
-			} else {
-				os << ".";
-			}
-		}
-	}
-
-	return os.str();
 }
 
 bool Player::isCreatureUnlockedOnTaskHunting(const MonsterType* mtype) const {

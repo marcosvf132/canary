@@ -206,11 +206,6 @@ bool IOLoginData::loadPlayer(Player* player, DBResult_ptr result)
 
   player->soul = result->getNumber<uint16_t>("soul");
   player->capacity = result->getNumber<uint32_t>("cap") * 100;
-  for (int i = 1; i <= 8; i++) {
-    std::ostringstream ss;
-    ss << "blessings" << i;
-    player->addBlessing(i, result->getNumber<uint16_t>(ss.str()));
-  }
 
   unsigned long attrSize;
   const char* attr = result->getStream("conditions", attrSize);
@@ -957,13 +952,10 @@ bool IOLoginData::savePlayer(Player* player)
   query << "`max_manashield` = " << player->getMaxManaShield() << ',';
   query << "`xpboost_value` = " << player->getStoreXpBoost() << ',';
   query << "`xpboost_stamina` = " << player->getExpBoostStamina() << ',';
-  query << "`quickloot_fallback` = " << (player->quickLootFallbackToMainContainer ? 1 : 0) << ',';
+  query << "`quickloot_fallback` = " << (player->quickLootFallbackToMainContainer ? 1 : 0);
 
   if (!player->isOffline()) {
-    query << "`onlinetime` = `onlinetime` + " << (time(nullptr) - player->lastLoginSaved) << ',';
-  }
-  for (int i = 1; i <= 8; i++) {
-    query << "`blessings" << i << "`" << " = " << static_cast<uint32_t>(player->getBlessingCount(i)) << ((i == 8) ? ' ' : ',');
+    query << ",`onlinetime` = `onlinetime` + " << (time(nullptr) - player->lastLoginSaved);
   }
   query << " WHERE `id` = " << player->getGUID();
 
