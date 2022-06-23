@@ -129,6 +129,11 @@ std::string Player::getDescription(int32_t lookDistance) const {
 		} else {
 			s << " You have no vocation.";
 		}
+
+		if (loyaltyTitle.length() != 0) {
+			s << " You are a " << loyaltyTitle << ".";
+		}
+
 	} else {
 		s << name;
 		if (!group->access) {
@@ -149,6 +154,15 @@ std::string Player::getDescription(int32_t lookDistance) const {
 		} else {
 			s << " has no vocation.";
 		}
+
+		if (loyaltyTitle.length() != 0) {
+			if (sex == PLAYERSEX_FEMALE) {
+				s << " She is a " << loyaltyTitle << ".";
+			} else {
+				s << " He is a " << loyaltyTitle << ".";
+			}
+		}
+
 	}
 
 	if (party) {
@@ -2556,6 +2570,43 @@ void Player::death(Creature* lastHitCreature) {
 			}
 		}
 
+		std::ostringstream lostBlesses;
+		if (bless.length() == 0) {
+			lostBlesses << "You lost all your blesses.";
+		} else {
+			lostBlesses << "You are still blessed with " << bless;
+		}
+		sendTextMessage(MESSAGE_EVENT_ADVANCE, lostBlesses.str());
+
+		// Pvp and pve death registration
+		std::ostringstream description;
+		if (pvpDeath) {
+			description << "Killed " << getName() << '.';
+    		CyclopediaCharacterInfo_RecentKillStatus_t status = unfairFightReduction != 100 ? CYCLOPEDIA_CHARACTERINFO_RECENTKILLSTATUS_UNJUSTIFIED : CYCLOPEDIA_CHARACTERINFO_RECENTKILLSTATUS_JUSTIFIED;
+			if (lastHitCreature && lastHitCreature->getPlayer()) {
+				lastHitCreature->getPlayer()->insertPvpKillOnHistory(std::move(description.str()), OTSYS_TIME() / 1000, status);
+			} else if (lastHitCreature && lastHitCreature->getMaster() && lastHitCreature->getMaster()->getPlayer()) {
+				lastHitCreature->getMaster()->getPlayer()->insertPvpKillOnHistory(std::move(description.str()), OTSYS_TIME() / 1000, status);
+			}
+		} else {
+			std::ostringstream description;
+			description << "Died at Level " << getLevel() << " by";
+			if (lastHitCreature) {
+				const char& character = lastHitCreature->getName().front();
+				if (character == 'a' || character == 'e' || character == 'i' || character == 'o' || character == 'u') {
+					description << " an ";
+				} else {
+					description << " a ";
+				}
+				description << lastHitCreature->getName();
+			} else {
+				description << " a field item";
+			}
+			description << '.';
+
+			insertDeathOnHistory(std::move(description.str()), OTSYS_TIME() / 1000);
+		}
+
 		sendStats();
 		sendSkills();
 		sendReLoginWindow(unfairFightReduction);
@@ -3697,6 +3748,123 @@ std::map<uint16_t, uint16_t> &Player::getAllSaleItemIdAndCount(std::map<uint16_t
 	}
 
 	return countMap;
+}
+
+StashItemList Player::getInventoryItemsId() const
+{
+	StashItemList itemMap;
+	for (int32_t i = CONST_SLOT_FIRST; i <= CONST_SLOT_LAST; i++) {
+		if (i == CONST_SLOT_STORE_INBOX) {
+			continue;
+		}
+
+		Item* item = inventory[i];
+		if (!item) {
+			continue;
+		}
+
+		auto rootSearch = itemMap.find(item->getID());
+		if (rootSearch != itemMap.end()) {
+			itemMap[item->getID()] += Item::countByType(item, -1);
+		}
+		else
+		{
+			itemMap.emplace(item->getID(), Item::countByType(item, -1));
+		}
+
+		if (Container* container = item->getContainer()) {
+			for (ContainerIterator it = container->iterator(); it.hasNext(); it.advance()) {
+				auto containerSearch = itemMap.find((*it)->getID());
+				if (containerSearch != itemMap.end()) {
+					itemMap[(*it)->getID()] += Item::countByType(*it, -1);
+				}
+				else
+				{
+					itemMap.emplace((*it)->getID(), Item::countByType(*it, -1));
+				}
+				itemMap.emplace((*it)->getID(), Item::countByType(*it, -1));
+			}
+		}
+	}
+	return itemMap;
+}
+
+StashItemList Player::getStoreInboxItemsId() const
+{
+	StashItemList itemMap;
+	Item* item = inventory[CONST_SLOT_STORE_INBOX];
+	if (!item) {
+		return itemMap;
+	}
+
+	auto rootSearch = itemMap.find(item->getID());
+	if (rootSearch != itemMap.end()) {
+		itemMap[item->getID()] += Item::countByType(item, -1);
+	} else {
+		itemMap.emplace(item->getID(), Item::countByType(item, -1));
+	}
+
+	if (Container* container = item->getContainer()) {
+		for (ContainerIterator it = container->iterator(); it.hasNext(); it.advance()) {
+			auto containerSearch = itemMap.find((*it)->getID());
+			if (containerSearch != itemMap.end()) {
+				itemMap[(*it)->getID()] += Item::countByType(*it, -1);
+			} else {
+				itemMap.emplace((*it)->getID(), Item::countByType(*it, -1));
+			}
+			itemMap.emplace((*it)->getID(), Item::countByType(*it, -1));
+		}
+	}
+	return itemMap;
+}
+
+StashItemList Player::getDepotItemsIds()
+{
+	StashItemList itemMap;
+	for (uint32_t i = g_configManager().getNumber(DEPOT_BOXES); i > 0; i--) {
+		DepotChest* depotChest = getDepotChest(i, false);
+		if (!depotChest) {
+			continue;
+		}
+
+		Container* c = depotChest->getContainer();
+		if (!c || c->empty()) {
+			continue;
+		}
+
+		for (ContainerIterator it = c->iterator(); it.hasNext(); it.advance()) {
+			auto itt = itemMap.find((*it)->getID());
+			if (itt == itemMap.end()) {
+				itemMap[(*it)->getID()] = Item::countByType((*it), -1);
+			} else {
+				itemMap[(*it)->getID()] += Item::countByType((*it), -1);
+			}
+		}
+	}
+
+	return itemMap;
+}
+
+StashItemList Player::getInboxItemsIds()
+{
+	StashItemList itemMap;
+	if (!inbox) {
+		return itemMap;
+	}
+
+	if (Container* container = inbox->getContainer()) {
+		for (ContainerIterator it = container->iterator(); it.hasNext(); it.advance()) {
+			auto containerSearch = itemMap.find((*it)->getID());
+			if (containerSearch != itemMap.end()) {
+				itemMap[(*it)->getID()] += Item::countByType(*it, -1);
+			} else {
+				itemMap.emplace((*it)->getID(), Item::countByType(*it, -1));
+			}
+			itemMap.emplace((*it)->getID(), Item::countByType(*it, -1));
+		}
+	}
+
+	return itemMap;
 }
 
 void Player::getAllItemTypeCountAndSubtype(std::map<uint32_t, uint32_t> &countMap) const {
@@ -6800,6 +6968,50 @@ void Player::registerForgeHistoryDescription(ForgeHistory history) {
 	history.description = detailsResponse.str();
 
 	setForgeHistory(history);
+}
+
+bool Player::addAchievement(uint16_t id, bool message/* = true*/, uint32_t timestamp/* = 0*/) {
+	if (hasAchievement(id)) {
+		return false;
+	}
+
+	Achievement achievement = g_game().getAchievementById(id);
+	if (achievement.id == 0) {
+		return false;
+	}
+
+	if (message) {
+		std::ostringstream ss;
+		ss << "Congratulations! You earned the achievement " << achievement.name << ".";
+		sendTextMessage(MESSAGE_EVENT_ADVANCE, ss.str());
+	}
+
+	addAchievementsPoints(achievement.points);
+	achievementsUnlocked.push_back({achievement.id, timestamp != 0 ? timestamp : (OTSYS_TIME() / 1000)});
+	achievementsUnlocked.shrink_to_fit();
+	return true;
+}
+
+bool Player::removeAchievement(uint16_t id) {
+	if (!hasAchievement(id)) {
+		return false;
+	}
+
+	Achievement achievement = g_game().getAchievementById(id);
+	if (achievement.id == 0) {
+		return false;
+	}
+
+	if (auto it = std::find_if(achievementsUnlocked.begin(), achievementsUnlocked.end(), [id](auto achievement_it) {
+			return achievement_it.first == id;
+		}); it != achievementsUnlocked.end()) {
+		achievementsUnlocked.erase(it);
+		removeAchievementsPoints(achievement.points);
+		achievementsUnlocked.shrink_to_fit();
+		return true;
+	}
+
+	return false;
 }
 
 /*******************************************************************************

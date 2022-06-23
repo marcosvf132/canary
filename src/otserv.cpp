@@ -180,6 +180,7 @@ void loadModules() {
 
 	g_game().loadBoostedCreature();
 	g_ioBosstiary().loadBoostedBoss();
+	g_game().initializeGameWorldHighscores();
 	g_ioprey().InitializeTaskHuntOptions();
 }
 

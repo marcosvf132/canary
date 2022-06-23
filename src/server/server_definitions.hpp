@@ -120,7 +120,6 @@ struct HighscoreCharacter {
 			name(std::move(name)),
 			points(points),
 			id(id),
-			rank(rank),
 			level(level),
 			vocation(vocation) { }
 
