@@ -648,336 +648,108 @@ void ProtocolGame::parsePacketFromDispatcher(NetworkMessage msg, uint8_t recvbyt
 	}
 
 	switch (recvbyte) {
-		case 0x14:
-			g_dispatcher().addTask(createTask(std::bind(&ProtocolGame::logout, getThis(), true, false)));
-			break;
-		case 0x1D:
-			addGameTask(&Game::playerReceivePingBack, player->getID());
-			break;
-		case 0x1E:
-			addGameTask(&Game::playerReceivePing, player->getID());
-			break;
-		case 0x2a:
-			addBestiaryTrackerList(msg);
-			break;
-		case 0x2B:
-			parsePartyAnalyzerAction(msg);
-			break;
-		case 0x2c:
-			parseLeaderFinderWindow(msg);
-			break;
-		case 0x2d:
-			parseMemberFinderWindow(msg);
-			break;
-		case 0x28:
-			parseStashWithdraw(msg);
-			break;
-		case 0x29:
-			parseRetrieveDepotSearch(msg);
-			break;
-		case 0x32:
-			parseExtendedOpcode(msg);
-			break; // otclient extended opcode
-		case 0x64:
-			parseAutoWalk(msg);
-			break;
-		case 0x65:
-			addGameTask(&Game::playerMove, player->getID(), DIRECTION_NORTH);
-			break;
-		case 0x66:
-			addGameTask(&Game::playerMove, player->getID(), DIRECTION_EAST);
-			break;
-		case 0x67:
-			addGameTask(&Game::playerMove, player->getID(), DIRECTION_SOUTH);
-			break;
-		case 0x68:
-			addGameTask(&Game::playerMove, player->getID(), DIRECTION_WEST);
-			break;
-		case 0x69:
-			addGameTask(&Game::playerStopAutoWalk, player->getID());
-			break;
-		case 0x6A:
-			addGameTask(&Game::playerMove, player->getID(), DIRECTION_NORTHEAST);
-			break;
-		case 0x6B:
-			addGameTask(&Game::playerMove, player->getID(), DIRECTION_SOUTHEAST);
-			break;
-		case 0x6C:
-			addGameTask(&Game::playerMove, player->getID(), DIRECTION_SOUTHWEST);
-			break;
-		case 0x6D:
-			addGameTask(&Game::playerMove, player->getID(), DIRECTION_NORTHWEST);
-			break;
-		case 0x6F:
-			addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_NORTH);
-			break;
-		case 0x70:
-			addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_EAST);
-			break;
-		case 0x71:
-			addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_SOUTH);
-			break;
-		case 0x72:
-			addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_WEST);
-			break;
-		case 0x73:
-			parseTeleport(msg);
-			break;
-		case 0x77:
-			parseHotkeyEquip(msg);
-			break;
-		case 0x78:
-			parseThrow(msg);
-			break;
-		case 0x79:
-			parseLookInShop(msg);
-			break;
-		case 0x7A:
-			parsePlayerBuyOnShop(msg);
-			break;
-		case 0x7B:
-			parsePlayerSellOnShop(msg);
-			break;
-		case 0x7C:
-			addGameTask(&Game::playerCloseShop, player->getID());
-			break;
-		case 0x7D:
-			parseRequestTrade(msg);
-			break;
-		case 0x7E:
-			parseLookInTrade(msg);
-			break;
-		case 0x7F:
-			addGameTask(&Game::playerAcceptTrade, player->getID());
-			break;
-		case 0x80:
-			addGameTask(&Game::playerCloseTrade, player->getID());
-			break;
-		case 0x82:
-			parseUseItem(msg);
-			break;
-		case 0x83:
-			parseUseItemEx(msg);
-			break;
-		case 0x84:
-			parseUseWithCreature(msg);
-			break;
-		case 0x85:
-			parseRotateItem(msg);
-			break;
-		case 0x86:
-			parseConfigureShowOffSocket(msg);
-			break;
-		case 0x87:
-			parseCloseContainer(msg);
-			break;
-		case 0x88:
-			parseUpArrowContainer(msg);
-			break;
-		case 0x89:
-			parseTextWindow(msg);
-			break;
-		case 0x8A:
-			parseHouseWindow(msg);
-			break;
-		case 0x8B:
-			parseWrapableItem(msg);
-			break;
-		case 0x8C:
-			parseLookAt(msg);
-			break;
-		case 0x8D:
-			parseLookInBattleList(msg);
-			break;
-		case 0x8E: /* join aggression */
-			break;
-		case 0x8F:
-			parseQuickLoot(msg);
-			break;
-		case 0x90:
-			parseLootContainer(msg);
-			break;
-		case 0x91:
-			parseQuickLootBlackWhitelist(msg);
-			break;
-		case 0x92:
-			parseOpenDepotSearch();
-			break;
-		case 0x93:
-			parseCloseDepotSearch();
-			break;
-		case 0x94:
-			parseDepotSearchItemRequest(msg);
-			break;
-		case 0x95:
-			parseOpenParentContainer(msg);
-			break;
-		case 0x96:
-			parseSay(msg);
-			break;
-		case 0x97:
-			addGameTask(&Game::playerRequestChannels, player->getID());
-			break;
-		case 0x98:
-			parseOpenChannel(msg);
-			break;
-		case 0x99:
-			parseCloseChannel(msg);
-			break;
-		case 0x9A:
-			parseOpenPrivateChannel(msg);
-			break;
-		case 0x9E:
-			addGameTask(&Game::playerCloseNpcChannel, player->getID());
-			break;
-		case 0x9F:
-			parseSetBossPodium(msg);
-			break;
-		case 0xA0:
-			parseFightModes(msg);
-			break;
-		case 0xA1:
-			parseAttack(msg);
-			break;
-		case 0xA2:
-			parseFollow(msg);
-			break;
-		case 0xA3:
-			parseInviteToParty(msg);
-			break;
-		case 0xA4:
-			parseJoinParty(msg);
-			break;
-		case 0xA5:
-			parseRevokePartyInvite(msg);
-			break;
-		case 0xA6:
-			parsePassPartyLeadership(msg);
-			break;
-		case 0xA7:
-			addGameTask(&Game::playerLeaveParty, player->getID());
-			break;
-		case 0xA8:
-			parseEnableSharedPartyExperience(msg);
-			break;
-		case 0xAA:
-			addGameTask(&Game::playerCreatePrivateChannel, player->getID());
-			break;
-		case 0xAB:
-			parseChannelInvite(msg);
-			break;
-		case 0xAC:
-			parseChannelExclude(msg);
-			break;
-		case 0xAE:
-			parseSendBosstiary();
-			break;
-		case 0xAF:
-			parseSendBosstiarySlots();
-			break;
-		case 0xB0:
-			parseBosstiarySlot(msg);
-			break;
-		case 0xB1:
-			parseHighscores(msg);
-			break;
-		case 0xBA:
-			parseTaskHuntingAction(msg);
-			break;
-		case 0xBE:
-			addGameTask(&Game::playerCancelAttackAndFollow, player->getID());
-			break;
-		case 0xBF:
-			parseForgeEnter(msg);
-			break;
-		case 0xC0:
-			parseForgeBrowseHistory(msg);
-			break;
-		case 0xC7:
-			parseTournamentLeaderboard(msg);
-			break;
-		case 0xC9: /* update tile */
-			break;
-		case 0xCA:
-			parseUpdateContainer(msg);
-			break;
-		case 0xCB:
-			parseBrowseField(msg);
-			break;
-		case 0xCC:
-			parseSeekInContainer(msg);
-			break;
-		case 0xCD:
-			parseInspectionObject(msg);
-			break;
-		case 0xD2:
-			addGameTask(&Game::playerRequestOutfit, player->getID());
-			break;
-		// g_dispatcher().addTask(createTask(std::bind(&Modules::executeOnRecvbyte, g_modules, player, msg, recvbyte)));
-		case 0xD3:
-			g_dispatcher().addTask(createTask(std::bind(&ProtocolGame::parseSetOutfit, getThis(), msg)));
-			break;
-		case 0xD4:
-			parseToggleMount(msg);
-			break;
-		case 0xD5:
-			parseApplyImbuement(msg);
-			break;
-		case 0xD6:
-			parseClearImbuement(msg);
-			break;
-		case 0xD7:
-			parseCloseImbuementWindow(msg);
-			break;
-		case 0xDC:
-			parseAddVip(msg);
-			break;
-		case 0xDD:
-			parseRemoveVip(msg);
-			break;
-		case 0xDE:
-			parseEditVip(msg);
-			break;
-		case 0xE1:
-			parseBestiarysendRaces();
-			break;
-		case 0xE2:
-			parseBestiarysendCreatures(msg);
-			break;
-		case 0xE3:
-			parseBestiarysendMonsterData(msg);
-			break;
-		case 0xE4:
-			parseSendBuyCharmRune(msg);
-			break;
-		case 0xE5:
-			parseCyclopediaCharacterInfo(msg);
-			break;
-		case 0xE6:
-			parseBugReport(msg);
-			break;
-		case 0xE7: /* thank you */
-			break;
-		case 0xE8:
-			parseDebugAssert(msg);
-			break;
-		case 0xEB:
-			parsePreyAction(msg);
-			break;
-		case 0xED:
-			parseSendResourceBalance();
-			break;
-		case 0xEE:
-			parseGreet(msg);
-			break;
-		// Premium coins transfer
-		// case 0xEF: parseCoinTransfer(msg); break;
-		case 0xF0:
-			addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerShowQuestLog, player->getID());
-			break;
-		case 0xF1:
-			parseQuestLine(msg);
-			break;
+		case 0x14: g_dispatcher().addTask(createTask(std::bind(&ProtocolGame::logout, getThis(), true, false))); break;
+		case 0x1D: addGameTask(&Game::playerReceivePingBack, player->getID()); break;
+		case 0x1E: addGameTask(&Game::playerReceivePing, player->getID()); break;
+		case 0x2a: addBestiaryTrackerList(msg); break;
+		case 0x2B: parsePartyAnalyzerAction(msg); break;
+		case 0x2c: parseLeaderFinderWindow(msg); break;
+		case 0x2d: parseMemberFinderWindow(msg); break;
+		case 0x28: parseStashWithdraw(msg); break;
+		case 0x32: parseExtendedOpcode(msg); break; //otclient extended opcode
+		case 0x64: parseAutoWalk(msg); break;
+		case 0x65: addGameTask(&Game::playerMove, player->getID(), DIRECTION_NORTH); break;
+		case 0x66: addGameTask(&Game::playerMove, player->getID(), DIRECTION_EAST); break;
+		case 0x67: addGameTask(&Game::playerMove, player->getID(), DIRECTION_SOUTH); break;
+		case 0x68: addGameTask(&Game::playerMove, player->getID(), DIRECTION_WEST); break;
+		case 0x69: addGameTask(&Game::playerStopAutoWalk, player->getID()); break;
+		case 0x6A: addGameTask(&Game::playerMove, player->getID(), DIRECTION_NORTHEAST); break;
+		case 0x6B: addGameTask(&Game::playerMove, player->getID(), DIRECTION_SOUTHEAST); break;
+		case 0x6C: addGameTask(&Game::playerMove, player->getID(), DIRECTION_SOUTHWEST); break;
+		case 0x6D: addGameTask(&Game::playerMove, player->getID(), DIRECTION_NORTHWEST); break;
+		case 0x6F: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_NORTH); break;
+		case 0x70: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_EAST); break;
+		case 0x71: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_SOUTH); break;
+		case 0x72: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_WEST); break;
+		case 0x73: parseTeleport(msg); break;
+		case 0x77: parseHotkeyEquip(msg); break;
+		case 0x78: parseThrow(msg); break;
+		case 0x79: parseLookInShop(msg); break;
+		case 0x7A: parsePlayerBuyOnShop(msg); break;
+		case 0x7B: parsePlayerSellOnShop(msg); break;
+		case 0x7C: addGameTask(&Game::playerCloseShop, player->getID()); break;
+		case 0x7D: parseRequestTrade(msg); break;
+		case 0x7E: parseLookInTrade(msg); break;
+		case 0x7F: addGameTask(&Game::playerAcceptTrade, player->getID()); break;
+		case 0x80: addGameTask(&Game::playerCloseTrade, player->getID()); break;
+		case 0x81: parseFriendSystemAction(msg); break;
+		case 0x82: parseUseItem(msg); break;
+		case 0x83: parseUseItemEx(msg); break;
+		case 0x84: parseUseWithCreature(msg); break;
+		case 0x85: parseRotateItem(msg); break;
+		case 0x86: parseConfigureShowOffSocket(msg); break;
+		case 0x87: parseCloseContainer(msg); break;
+		case 0x88: parseUpArrowContainer(msg); break;
+		case 0x89: parseTextWindow(msg); break;
+		case 0x8A: parseHouseWindow(msg); break;
+		case 0x8B: parseWrapableItem(msg); break;
+		case 0x8C: parseLookAt(msg); break;
+		case 0x8D: parseLookInBattleList(msg); break;
+		case 0x8E: /* join aggression */ break;
+		case 0x8F: parseQuickLoot(msg); break;
+		case 0x90: parseLootContainer(msg); break;
+		case 0x91: parseQuickLootBlackWhitelist(msg); break;
+		case 0x92: parseRequestLockItems(); break;
+		case 0x96: parseSay(msg); break;
+		case 0x97: addGameTask(&Game::playerRequestChannels, player->getID()); break;
+		case 0x98: parseOpenChannel(msg); break;
+		case 0x99: parseCloseChannel(msg); break;
+		case 0x9A: parseOpenPrivateChannel(msg); break;
+		case 0x9E: addGameTask(&Game::playerCloseNpcChannel, player->getID()); break;
+		case 0xA0: parseFightModes(msg); break;
+		case 0xA1: parseAttack(msg); break;
+		case 0xA2: parseFollow(msg); break;
+		case 0xA3: parseInviteToParty(msg); break;
+		case 0xA4: parseJoinParty(msg); break;
+		case 0xA5: parseRevokePartyInvite(msg); break;
+		case 0xA6: parsePassPartyLeadership(msg); break;
+		case 0xA7: addGameTask(&Game::playerLeaveParty, player->getID()); break;
+		case 0xA8: parseEnableSharedPartyExperience(msg); break;
+		case 0xAA: addGameTask(&Game::playerCreatePrivateChannel, player->getID()); break;
+		case 0xAB: parseChannelInvite(msg); break;
+		case 0xAC: parseChannelExclude(msg); break;
+		case 0xB1: parseHighscores(msg); break;
+		case 0xBA: parseTaskHuntingAction(msg); break;
+		case 0xBE: addGameTask(&Game::playerCancelAttackAndFollow, player->getID()); break;
+		case 0xC7: parseTournamentLeaderboard(msg); break;
+		case 0xC9: /* update tile */ break;
+		case 0xCA: parseUpdateContainer(msg); break;
+		case 0xCB: parseBrowseField(msg); break;
+		case 0xCC: parseSeekInContainer(msg); break;
+		case 0xCD: parseInspectionObject(msg); break;
+		case 0xD2: addGameTask(&Game::playerRequestOutfit, player->getID()); break;
+		//g_dispatcher().addTask(createTask(std::bind(&Modules::executeOnRecvbyte, g_modules, player, msg, recvbyte)));
+		case 0xD3: g_dispatcher().addTask(createTask(std::bind(&ProtocolGame::parseSetOutfit, getThis(), msg))); break;
+		case 0xD4: parseToggleMount(msg); break;
+		case 0xD5: parseApplyImbuement(msg); break;
+		case 0xD6: parseClearImbuement(msg); break;
+		case 0xD7: parseCloseImbuementWindow(msg); break;
+		case 0xDC: parseAddVip(msg); break;
+		case 0xDD: parseRemoveVip(msg); break;
+		case 0xDE: parseEditVip(msg); break;
+		case 0xE1: parseBestiarysendRaces(); break;
+		case 0xE2: parseBestiarysendCreatures(msg); break;
+		case 0xE3: parseBestiarysendMonsterData(msg); break;
+		case 0xE4: parseSendBuyCharmRune(msg); break;
+		case 0xE5: parseCyclopediaCharacterInfo(msg); break;
+		case 0xE6: parseBugReport(msg); break;
+		case 0xE7: /* thank you */ break;
+		case 0xE8: parseDebugAssert(msg); break;
+		case 0xEB: parsePreyAction(msg); break;
+		case 0xEE: parseGreet(msg); break;
+		case 0xEF: if (!g_configManager().getBoolean(STOREMODULES)) { parseCoinTransfer(msg); } break; /* premium coins transfer */
+		case 0xF0: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerShowQuestLog, player->getID()); break;
+		case 0xF1: parseQuestLine(msg); break;
 		// case 0xF2: parseRuleViolationReport(msg); break;
 		case 0xF3: /* get object info */
 			break;
@@ -1776,7 +1548,12 @@ void ProtocolGame::sendHighscores(const std::vector<HighscoreCharacter>& charact
 		}
 		msg.add<uint32_t>(character.rank); // Rank
 		msg.addString(character.name); // Character Name
-		msg.addString(""); // Probably Character Title(not visible in window)
+		if (character.title != 0) {
+			// Probably Character Title(not visible in window)
+			msg.addString(g_game().getTitle(character.title).maleName);
+		} else {
+			msg.add<uint16_t>(0x00);
+		}
 		msg.addByte(character.vocation); // Vocation Id
 		msg.addString(g_configManager().getString(SERVER_NAME)); // World
 		msg.add<uint16_t>(character.level); // Level
@@ -2861,6 +2638,15 @@ void ProtocolGame::sendAddMarker(const Position &pos, uint8_t markType, const st
 	writeToOutputBuffer(msg);
 }
 
+void ProtocolGame::parseFriendSystemAction(NetworkMessage &msg)
+{
+	uint8_t state = msg.getByte();
+	if (state == 0x0E) {
+		uint8_t titleId = msg.getByte();
+		addGameTask(&Game::playerFriendSystemAction, player->getID(), state, titleId);
+	}
+}
+
 // Cyclopedia character info
 void ProtocolGame::sendCyclopediaCharacterNoData(CyclopediaCharacterInfoType_t characterInfoType, uint8_t errorCode) {
 	// Error 1: 'No data available at the moment.'
@@ -2885,7 +2671,7 @@ void ProtocolGame::sendCyclopediaCharacterBaseInformation() {
 
 	msg.addByte(g_configManager().getBoolean(STAMINA_SYSTEM) ? 0x00 : 0x01); // Hide stamina
 	msg.addByte(0x01); // Store summary & Character titles
-	msg.addString("Titulo teste"); // character title
+	msg.addString(player->getCurrentTitleName());
 	writeToOutputBuffer(msg);
 }
 
@@ -2936,6 +2722,8 @@ void ProtocolGame::sendCyclopediaCharacterGeneralStats() {
 		msg.addByte(HardcodedSkillIds[i]);
 		msg.add<uint16_t>(std::min<int32_t>(player->getSkillLevel(i), std::numeric_limits<uint16_t>::max()));
 		msg.add<uint16_t>(player->getRawSkill(i));
+		// todo verificar
+		// msg.add<uint16_t>(player->getBaseSkill(i));
 		// loyalty bonus
 		msg.add<uint16_t>(player->getBaseSkill(i));
 		msg.add<uint16_t>(player->getSkillPercent(i) * 100);
@@ -3426,6 +3214,13 @@ void ProtocolGame::sendCyclopediaCharacterInspection() {
 	playerDescriptionSize++;
 	msg.addString("Vocation");
 	msg.addString(player->getVocation()->getVocName());
+
+	// Player title
+	if (player->getCurrentTitle() != 0) {
+		playerDescriptionSize++;
+		msg.addString("Title");
+		msg.addString(player->getCurrentTitleName());
+	}
 
 	// Loyalty title
 	if (player->getLoyaltyTitle().length() != 0) {
@@ -6238,6 +6033,7 @@ void ProtocolGame::AddPlayerSkills(NetworkMessage &msg) {
 	for (uint8_t i = SKILL_CRITICAL_HIT_CHANCE; i <= SKILL_LAST; ++i) {
 		msg.add<uint16_t>(std::min<int32_t>(player->getSkillLevel(i), std::numeric_limits<uint16_t>::max()));
 		msg.add<uint16_t>(player->getRawSkill(i));
+		// TODO verificar: msg.add<uint16_t>(player->getBaseSkill(i));
 	}
 
 	// Version 12.81 new skill (Fatal, Dodge and Momentum)

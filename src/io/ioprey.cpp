@@ -511,6 +511,7 @@ void IOPrey::ParseTaskHuntingAction(Player* player, PreySlot_t slotId, PreyTaskA
 			slot->reloadReward();
 			slot->state = PreyTaskDataState_Inactive;
 			player->addTaskHuntingPoints(reward);
+			player->addTaskHuntingPointsObtained(reward);
 			player->sendMessageDialog(ss.str());
 			slot->reloadMonsterGrid(player->getTaskHuntingBlackList(), player->getLevel());
 			slot->disabledUntilTimeStamp = OTSYS_TIME() + g_configManager().getNumber(TASK_HUNTING_LIMIT_EXHAUST) * 1000;

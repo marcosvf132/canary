@@ -5833,6 +5833,80 @@ bool Game::combatChangeHealth(Creature* attacker, Creature* target, CombatDamage
 			}
 		}
 
+		// Using real damage
+		if (attackerPlayer) {
+			//life leech
+			uint16_t lifeChance = attackerPlayer->getSkillLevel(SKILL_LIFE_LEECH_CHANCE);
+			uint16_t lifeSkill = attackerPlayer->getSkillLevel(SKILL_LIFE_LEECH_AMOUNT);
+			if (normal_random(0, 100) < lifeChance) {
+				// Vampiric charm rune
+				if (targetMonster) {
+					if (uint16_t playerCharmRaceidVamp = attackerPlayer->parseRacebyCharm(CHARM_VAMP, false, 0);
+						playerCharmRaceidVamp != 0 && playerCharmRaceidVamp == targetMonster->getRaceId()) {
+						if (const Charm* lifec = g_iobestiary().getBestiaryCharm(CHARM_VAMP)) {
+							lifeSkill += lifec->percent;
+						}
+					}
+				}
+				CombatParams tmpParams;
+				CombatDamage tmpDamage;
+
+				int affected = damage.affected;
+				tmpDamage.origin = ORIGIN_SPELL;
+				tmpDamage.primary.type = COMBAT_HEALING;
+				tmpDamage.primary.value = std::round(realDamage * (lifeSkill / 100.) * (0.2 * affected + 0.9)) / affected;
+
+				Combat::doCombatHealth(nullptr, attackerPlayer, tmpDamage, tmpParams);
+			}
+
+			//mana leech
+			uint16_t manaChance = attackerPlayer->getSkillLevel(SKILL_MANA_LEECH_CHANCE);
+      		uint16_t manaSkill = attackerPlayer->getSkillLevel(SKILL_MANA_LEECH_AMOUNT);
+			if (normal_random(0, 100) < manaChance) {
+				// Void charm rune
+				if (targetMonster) {
+					if (uint16_t playerCharmRaceidVoid = attackerPlayer->parseRacebyCharm(CHARM_VOID, false, 0);
+						playerCharmRaceidVoid != 0 && playerCharmRaceidVoid == targetMonster->getRace()) {
+						if (const Charm* voidc = g_iobestiary().getBestiaryCharm(CHARM_VOID)) {
+							manaSkill += voidc->percent;
+						}
+					}
+				}
+				CombatParams tmpParams;
+				CombatDamage tmpDamage;
+
+				int affected = damage.affected;
+				tmpDamage.origin = ORIGIN_SPELL;
+				tmpDamage.primary.type = COMBAT_MANADRAIN;
+				tmpDamage.primary.value = std::round(realDamage * (manaSkill / 100.) * (0.1 * affected + 0.9)) / affected;
+
+				Combat::doCombatMana(nullptr, attackerPlayer, tmpDamage, tmpParams);
+			}
+
+			// Charm rune (attacker as player)
+			if (!damage.extension && targetMonster) {
+				if (charmRune_t activeCharm = g_iobestiary().getCharmFromTarget(attackerPlayer, g_monsters().getMonsterTypeByRaceId(targetMonster->getRaceId()));
+					activeCharm != CHARM_NONE) {
+					if (Charm* charm = g_iobestiary().getBestiaryCharm(activeCharm);
+						charm->type == CHARM_OFFENSIVE && (charm->chance >= normal_random(0, 100))) {
+						g_iobestiary().parseCharmCombat(charm, attackerPlayer, target, realDamage);
+					}
+				}
+			}
+
+			// Party hunt analyzer
+			if (Party* party = attackerPlayer->getParty()) {
+				/* Damage on primary type */
+				if (damage.primary.value != 0) {
+					party->addPlayerDamage(attackerPlayer, damage.primary.value);
+				}
+				/* Damage on secondary type */
+				if (damage.secondary.value != 0) {
+					party->addPlayerDamage(attackerPlayer, damage.secondary.value);
+				}
+			}
+		}
+
 		if (spectators.empty()) {
 			map.getSpectators(spectators, targetPos, true, true);
 		}
@@ -6925,6 +6999,21 @@ void Game::playerCyclopediaCharacterInfo(uint32_t playerId, uint32_t characterId
 	} else {
 		player->sendCyclopediaCharacterNoData(type, 1);
 		SPDLOG_WARN("[Game::playerCyclopediaCharacterInfo] - Unknown type {}", type);
+	}
+}
+
+void Game::playerFriendSystemAction(uint32_t playerId, uint8_t type, uint8_t titleId)
+{
+	Player* player = getPlayerByID(playerId);
+	if (!player) {
+		return;
+	}
+
+	if (type == 0x0E) {
+		player->setCurrentTitle(titleId);
+		player->sendCyclopediaCharacterBaseInformation();
+		player->sendCyclopediaCharacterTitles(getPlayerTitles());
+		return;
 	}
 }
 
@@ -8529,11 +8618,13 @@ void Game::initializeGameWorldHighscores()
 
 		uint16_t characterLevel;
 		uint64_t characterPoints;
+		uint8_t titleId;
 		uint32_t characterId = result->getNumber<uint32_t>("id");
 		std::string characterName = std::move(result->getString("name"));
 		Player* player = getPlayerByID(characterId);
 		if (player) {
 			characterLevel = player->getLevel();
+			titleId = player->getCurrentTitle();
 		} else {
 			characterLevel = result->getNumber<uint16_t>("level");
 		}
@@ -8574,7 +8665,7 @@ void Game::initializeGameWorldHighscores()
 			}
 
 			if (characterPoints != 0) {
-				highscores[i].emplace_back(characterName, characterPoints, characterId, characterLevel, characterVocation);
+				highscores[i].emplace_back(characterName, characterPoints, characterId, characterLevel, characterVocation, titleId);
 			}
 		}
 
@@ -8595,6 +8686,7 @@ void Game::initializeGameWorldHighscores()
 				query.str(std::string());
 				query <<  "SELECT * FROM `player_summary` WHERE `player_id`=" << characterId;
 				if (childResult = db.storeQuery(query.str())) {
+					titleId = static_cast<uint8_t>(childResult->getNumber<uint16_t>("title"));
 					switch (static_cast<HighscoreCategories_t>(i)) {
 						case HIGHSCORE_CATEGORY_ACHIEVEMENTS: characterPoints = childResult->getNumber<uint64_t>("achievements_points"); break;
 						case HIGHSCORE_CATEGORY_CHARMS: characterPoints = childResult->getNumber<uint64_t>("charms"); break;
@@ -8608,7 +8700,7 @@ void Game::initializeGameWorldHighscores()
 			}
 
 			if (characterPoints != 0) {
-				highscores[i].emplace_back(characterName, characterPoints, characterId, characterLevel, characterVocation);
+				highscores[i].emplace_back(characterName, characterPoints, characterId, characterLevel, characterVocation, titleId);
 			}
 		}
 
@@ -8624,7 +8716,7 @@ void Game::initializeGameWorldHighscores()
 			}
 		}
 		if (characterPoints != 0) {
-			highscores[static_cast<uint8_t>(HIGHSCORE_CATEGORY_LOYALTY)].emplace_back(characterName, characterPoints, characterId, characterLevel, characterVocation);
+			highscores[static_cast<uint8_t>(HIGHSCORE_CATEGORY_LOYALTY)].emplace_back(characterName, characterPoints, characterId, characterLevel, characterVocation, titleId);
 		}
 
 	} while (result->next());

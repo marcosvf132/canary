@@ -306,19 +306,21 @@ class ProtocolGame final : public Protocol {
 
 		void sendTournamentLeaderboard();
 
-		void sendCyclopediaCharacterNoData(CyclopediaCharacterInfoType_t characterInfoType, uint8_t errorCode);
-		void sendCyclopediaCharacterBaseInformation();
-		void sendCyclopediaCharacterGeneralStats();
-		void sendCyclopediaCharacterCombatStats();
-		void sendCyclopediaCharacterRecentDeaths(uint16_t requestedPage, uint16_t itemsPerPage, const std::vector<RecentDeathEntry> &entries);
-		void sendCyclopediaCharacterRecentPvPKills(uint16_t requestedPage, uint16_t itemsPerPage, const std::vector<RecentPvPKillEntry> &entries);
-		void sendCyclopediaCharacterAchievements(uint16_t secretsUnlocked, std::vector<std::pair<Achievement, uint32_t>> achievementsUnlocked);
-		void sendCyclopediaCharacterItemSummary(StashItemList inventoryItems, StashItemList storeInboxItems, StashItemList supplyStashItems,												StashItemList depotBoxItems, StashItemList inboxItems);
-		void sendCyclopediaCharacterOutfitsMounts();
-		void sendCyclopediaCharacterStoreSummary();
-		void sendCyclopediaCharacterInspection();
-		void sendCyclopediaCharacterBadges();
-		void sendCyclopediaCharacterTitles(std::map<uint8_t, PlayerTitle> titles, uint8_t currentTitle);
+	    void parseFriendSystemAction(NetworkMessage &msg);
+
+	    void sendCyclopediaCharacterNoData(CyclopediaCharacterInfoType_t characterInfoType, uint8_t errorCode);
+	    void sendCyclopediaCharacterBaseInformation();
+	    void sendCyclopediaCharacterGeneralStats();
+	    void sendCyclopediaCharacterCombatStats();
+	    void sendCyclopediaCharacterRecentDeaths(uint16_t requestedPage, uint16_t itemsPerPage, const std::vector<RecentDeathEntry> &entries);
+	    void sendCyclopediaCharacterRecentPvPKills(uint16_t requestedPage, uint16_t itemsPerPage, const std::vector<RecentPvPKillEntry> &entries);
+	    void sendCyclopediaCharacterAchievements(uint16_t secretsUnlocked, std::vector<std::pair<Achievement, uint32_t>> achievementsUnlocked);
+	    void sendCyclopediaCharacterItemSummary(StashItemList inventoryItems, StashItemList storeInboxItems, StashItemList supplyStashItems, StashItemList depotBoxItems, StashItemList inboxItems);
+	    void sendCyclopediaCharacterOutfitsMounts();
+	    void sendCyclopediaCharacterStoreSummary();
+	    void sendCyclopediaCharacterInspection();
+	    void sendCyclopediaCharacterBadges();
+	    void sendCyclopediaCharacterTitles(std::map<uint8_t, PlayerTitle> titles, uint8_t currentTitle);
 
 		void sendCreatureWalkthrough(const Creature* creature, bool walkthrough);
 		void sendCreatureShield(const Creature* creature);

@@ -3560,6 +3560,7 @@ int PlayerFunctions::luaPlayerSetLoyaltyBonus(lua_State* L) {
 	}
 
 	player->setLoyaltyBonus(getNumber<uint8_t>(L, 2));
+	pushBoolean(L, true);
 	return 1;
 }
 
@@ -3572,7 +3573,6 @@ int PlayerFunctions::luaPlayerGetLoyaltyBonus(lua_State* L) {
 	}
 
 	lua_pushnumber(L, player->getLoyaltyBonus());
-	pushBoolean(L, true);
 	return 1;
 }
 
