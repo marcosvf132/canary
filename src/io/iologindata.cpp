@@ -688,14 +688,31 @@ bool IOLoginData::loadPlayer(Player* player, DBResult_ptr result) {
 			} while (result->next());
 		}
 	}
-	loadPlayerSummary(player);
-	loadPlayerDeathHistory(player);
-	player->initializePrey();
+	loadPlayerBadgeSystem(player);
+    loadplayersummary(player);
+    loadplayerdeathhistory(player);
+    player->initializePrey();
 	player->initializeTaskHunting();
 	player->updateBaseSpeed();
 	player->updateInventoryWeight();
 	player->updateItemsLight(true);
 	return true;
+}
+
+void IOLoginData::loadPlayerBadgeSystem(Player* player)
+{
+  DBResult_ptr result;
+  std::ostringstream query;
+  Database& db = Database::getInstance();
+
+  query << "SELECT `level`, `vocation` FROM `players` WHERE `account_id` = " << player->getAccount();
+  if (result = db.storeQuery(query.str())) {
+    do {
+      uint16_t vocation = result->getNumber<uint16_t>("vocation");
+      uint16_t level = result->getNumber<uint16_t>("level");
+      player->accountLevelSummary[static_cast<uint8_t>(vocation)].emplace_back(level);
+    } while (result->next());
+  }
 }
 
 void IOLoginData::loadPlayerSummary(Player* player)

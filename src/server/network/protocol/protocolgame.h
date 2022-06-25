@@ -319,7 +319,7 @@ class ProtocolGame final : public Protocol {
 	    void sendCyclopediaCharacterOutfitsMounts();
 	    void sendCyclopediaCharacterStoreSummary();
 	    void sendCyclopediaCharacterInspection();
-	    void sendCyclopediaCharacterBadges();
+		void sendCyclopediaCharacterBadges(std::map<uint8_t, std::string> badges);
 	    void sendCyclopediaCharacterTitles(std::map<uint8_t, PlayerTitle> titles, uint8_t currentTitle);
 
 		void sendCreatureWalkthrough(const Creature* creature, bool walkthrough);

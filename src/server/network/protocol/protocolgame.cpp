@@ -3280,13 +3280,32 @@ void ProtocolGame::sendCyclopediaCharacterInspection() {
 	writeToOutputBuffer(msg);
 }
 
-void ProtocolGame::sendCyclopediaCharacterBadges() {
+void ProtocolGame::sendCyclopediaCharacterBadges(std::map<uint8_t, std::string> badges) {
 	NetworkMessage msg;
 	msg.addByte(0xDA);
 	msg.addByte(CYCLOPEDIA_CHARACTERINFO_BADGES);
-	msg.addByte(0x00);
-	// enable badges
-	msg.addByte(0x00);
+	msg.addByte(0x00); // 0x00 Here means 'no error'
+
+	msg.addByte(0x01); // Show info or not
+	// if not then return
+	msg.addByte(0x01);	// Is online
+	msg.addByte(player->isPremium() ? 0x01 : 0x00);
+	msg.addString(player->getLoyaltyTitle());
+
+	uint8_t badgesSize = 0;
+	auto badgesSizePosition = msg.getBufferPosition();
+	msg.skipBytes(1);
+	for (const auto it : badges) {
+		if (player->hasBadge(it.first)) {
+			msg.add<uint32_t>(it.first);
+			msg.addString(it.second);
+			badgesSize++;
+		}
+	}
+
+	msg.setBufferPosition(badgesSizePosition);
+	msg.addByte(badgesSize);
+
 	writeToOutputBuffer(msg);
 }
 
