@@ -2755,7 +2755,7 @@ void Player::despawn()
 			oldStackPosVector.push_back(player->canSeeCreature(this) ? tile->getStackposOfCreature(player, this) : -1);
 		}
 		if (Player* player = spectator->getPlayer()) {
-			player->sendRemoveTileThing(tile->getPosition(), oldStackPosVector[i++]);
+			player->sendRemoveTileCreature(tile->getPosition(), oldStackPosVector[i++], this->getID());
 		}
 
 		spectator->onRemoveCreature(this, false);

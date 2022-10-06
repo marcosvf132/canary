@@ -2667,7 +2667,7 @@ int PlayerFunctions::luaPlayerSetGhostMode(lua_State* L) {
 		Player* tmpPlayer = spectator->getPlayer();
 		if (tmpPlayer != player && !tmpPlayer->isAccessPlayer()) {
 			if (enabled) {
-				tmpPlayer->sendRemoveTileThing(position, tile->getStackposOfCreature(tmpPlayer, player));
+				tmpPlayer->sendRemoveTileCreature(position, tile->getStackposOfCreature(tmpPlayer, player), player->getID());
 			} else {
 				tmpPlayer->sendCreatureAppear(player, position, true);
 			}

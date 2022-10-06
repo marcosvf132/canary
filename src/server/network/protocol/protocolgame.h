@@ -397,6 +397,7 @@ private:
 	void sendAddTileItem(const Position &pos, uint32_t stackpos, const Item *item);
 	void sendUpdateTileItem(const Position &pos, uint32_t stackpos, const Item *item);
 	void sendRemoveTileThing(const Position &pos, uint32_t stackpos);
+	void sendRemoveTileCreature(const Position &pos, uint32_t stackpos, uint32_t cid);
 	void sendUpdateTile(const Tile *tile, const Position &pos);
 
 	void sendAddCreature(const Creature *creature, const Position &pos, int32_t stackpos, bool isLogin);
@@ -456,6 +457,7 @@ private:
 
 	//tiles
 	static void RemoveTileThing(NetworkMessage &msg, const Position &pos, uint32_t stackpos);
+	static void RemoveCreatureFromTile(NetworkMessage &msg, uint32_t cid, const Position &pos, uint32_t stackpos);
 
 	void sendTaskHuntingData(const TaskHuntingSlot* slot);
 
