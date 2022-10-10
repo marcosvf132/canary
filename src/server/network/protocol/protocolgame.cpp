@@ -838,14 +838,20 @@ void ProtocolGame::parseHotkeyEquip(NetworkMessage &msg)
 
 void ProtocolGame::GetTileDescription(const Tile *tile, NetworkMessage &msg)
 {
+	uint8_t insertions = 0;
 	if (Item *ground = tile->getGround()) {
 		AddItem(msg, ground);
+		insertions++;
 	}
 
 	const TileItemVector *items = tile->getItemList();
 	if (items) {
 		for (auto it = items->getBeginTopItem(), end = items->getEndTopItem(); it != end; ++it) {
 			AddItem(msg, *it);
+			insertions++;
+			if (insertions >= 9) {
+				break;
+			}
 		}
 	}
 
@@ -859,12 +865,21 @@ void ProtocolGame::GetTileDescription(const Tile *tile, NetworkMessage &msg)
 			uint32_t removedKnown;
 			checkCreatureAsKnown(creature->getID(), known, removedKnown);
 			AddCreature(msg, creature, known, removedKnown);
+			insertions++;
 		}
+	}
+
+	if (insertions >= 9) {
+		return;
 	}
 
 	if (items) {
 		for (auto it = items->getBeginDownItem(), end = items->getEndDownItem(); it != end; ++it) {
 			AddItem(msg, *it);
+			insertions++;
+			if (insertions >= 9) {
+				break;
+			}
 		}
 	}
 }
