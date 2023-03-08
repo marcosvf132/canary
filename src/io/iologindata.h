@@ -49,8 +49,8 @@ class IOLoginData {
 		static void loadItems(ItemMap &itemMap, DBResult_ptr result, Player &player);
 		static bool saveItems(const Player* player, const ItemBlockList &itemList, DBInsert &query_insert, PropWriteStream &stream);
 
-		static void loadItems(ItemMap& itemMap, DBResult_ptr result);
-		static bool saveItems(const Player* player, const ItemBlockList& itemList, DBInsert& query_insert, PropWriteStream& stream);
+		static void loadItems(ItemMap &itemMap, DBResult_ptr result);
+		static bool saveItems(const Player* player, const ItemBlockList &itemList, DBInsert &query_insert, PropWriteStream &stream);
 		static bool savePlayerSummary(const Player* player);
 		static void loadPlayerBadgeSystem(Player* player);
 		static void loadPlayerSummary(Player* player);

@@ -174,7 +174,6 @@ std::string Player::getDescription(int32_t lookDistance) const {
 				s << "She is a " << getCurrentTitleName() << ".";
 			}
 		}
-
 	}
 
 	if (party) {
@@ -266,31 +265,30 @@ Item* Player::getWeapon(Slots_t slot, bool ignoreAmmo) const {
 	return item;
 }
 
-bool Player::hasQuiverEquipped() const {
-	Item* quiver = inventory[CONST_SLOT_RIGHT];
-	return quiver && quiver->isQuiver() && quiver->getContainer();
+bool Player::hasQuiverEquipped() const {Item* quiver = inventory[CONST_SLOT_RIGHT];
+			return quiver && quiver->isQuiver() && quiver->getContainer();
 }
 
 bool Player::hasWeaponDistanceEquipped() const {
 	const Item* item = inventory[CONST_SLOT_LEFT];
-	return item && item->getWeaponType() == WEAPON_DISTANCE;
+				return item && item->getWeaponType() == WEAPON_DISTANCE;
 }
-
-Item* Player::getQuiverAmmoOfType(const ItemType &it) const {
-	if (!hasQuiverEquipped()) {
-		return nullptr;
-	}
+			Item* Player::getQuiverAmmoOfType(const ItemType &it) const {
+			if (!hasQuiverEquipped()) {
+				return nullptr;
+			}
 
 	Item* quiver = inventory[CONST_SLOT_RIGHT];
-	for (const Container* container = quiver->getContainer();
-		 Item * ammoItem : container->getItemList()) {
-		if (ammoItem->getAmmoType() == it.ammoType) {
-			if (level >= Item::items[ammoItem->getID()].minReqLevel) {
-				return ammoItem;
+			for (const Container* container = quiver->getContainer();Item* ammoItem : container->getItemList()) {
+				if (ammoItem->getAmmoType() == it.ammoType) {
+					if (level >= Item::items[ammoItem->getID()].minReqLevel) {
+						return ammoItem;
+
+				}
 			}
-		}
-	}
-	return nullptr;
+			}
+				return nullptr;
+
 }
 
 Item* Player::getWeapon(bool ignoreAmmo /* = false*/) const {
@@ -808,8 +806,7 @@ void Player::addStorageValue(const uint32_t key, const int32_t value, const bool
 	}
 }
 
-int32_t Player::getStorageValue(const uint32_t key) const {
-	int32_t value = -1;
+int32_t Player::getStorageValue(const uint32_t key) const { int32_t value= -1;
 	auto it = storageMap.find(key);
 	if (it == storageMap.end()) {
 		return value;
@@ -1035,6 +1032,8 @@ bool Player::isNearDepotBox() const {
 	}
 	return false;
 }
+
+
 
 DepotChest* Player::getDepotChest(uint32_t depotId, bool autoCreate) {
 	auto it = depotChests.find(depotId);
@@ -1350,6 +1349,11 @@ void Player::onClearImbuement(Item* item, uint8_t slot) {
 
 void Player::openImbuementWindow(Item* item) {
 	if (!client || !item) {
+		return;
+	}
+
+	if (item->getTopParent() != this) {
+		this->sendTextMessage(MESSAGE_FAILURE, "You have to pick up the item to imbue it.");
 		return;
 	}
 
@@ -2594,7 +2598,7 @@ void Player::death(Creature* lastHitCreature) {
 		std::ostringstream description;
 		if (pvpDeath) {
 			description << "Killed " << getName() << '.';
-    		CyclopediaCharacterInfo_RecentKillStatus_t status = unfairFightReduction != 100 ? CYCLOPEDIA_CHARACTERINFO_RECENTKILLSTATUS_UNJUSTIFIED : CYCLOPEDIA_CHARACTERINFO_RECENTKILLSTATUS_JUSTIFIED;
+			CyclopediaCharacterInfo_RecentKillStatus_t status = unfairFightReduction != 100 ? CYCLOPEDIA_CHARACTERINFO_RECENTKILLSTATUS_UNJUSTIFIED : CYCLOPEDIA_CHARACTERINFO_RECENTKILLSTATUS_JUSTIFIED;
 			if (lastHitCreature && lastHitCreature->getPlayer()) {
 				lastHitCreature->getPlayer()->insertPvpKillOnHistory(std::move(description.str()), OTSYS_TIME() / 1000, status);
 			} else if (lastHitCreature && lastHitCreature->getMaster() && lastHitCreature->getMaster()->getPlayer()) {
@@ -2603,7 +2607,7 @@ void Player::death(Creature* lastHitCreature) {
 		} else {
 			description << "Died at Level " << getLevel() << " by";
 			if (lastHitCreature) {
-				const char& character = lastHitCreature->getName().front();
+				const char &character = lastHitCreature->getName().front();
 				if (character == 'a' || character == 'e' || character == 'i' || character == 'o' || character == 'u') {
 					description << " an ";
 				} else {
@@ -2986,32 +2990,33 @@ ReturnValue Player::queryAdd(int32_t index, const Thing &thing, uint32_t count, 
 
 		case CONST_SLOT_RIGHT: {
 			if (slotPosition & SLOTP_RIGHT) {
-				if (item->getWeaponType() != WEAPON_SHIELD && !item->isQuiver()) {
-					ret = RETURNVALUE_CANNOTBEDRESSED;
-				} else {
-					const Item* leftItem = inventory[CONST_SLOT_LEFT];
-					if (leftItem) {
-						if ((leftItem->getSlotPosition() | slotPosition) & SLOTP_TWO_HAND) {
-							if (item->isQuiver() && leftItem->getWeaponType() == WEAPON_DISTANCE)
+
+					if (item->getWeaponType() != WEAPON_SHIELD && !item->isQuiver()) {
+						ret = RETURNVALUE_CANNOTBEDRESSED;
+					} else {
+						const Item* leftItem = inventory[CONST_SLOT_LEFT];
+						if (leftItem) {
+							if ((leftItem->getSlotPosition() | slotPosition) & SLOTP_TWO_HAND) {
+								if (item->isQuiver() && leftItem->getWeaponType() == WEAPON_DISTANCE)
+									ret = RETURNVALUE_NOERROR;
+								else
+									ret = RETURNVALUE_BOTHHANDSNEEDTOBEFREE;
+							} else {
 								ret = RETURNVALUE_NOERROR;
-							else
-								ret = RETURNVALUE_BOTHHANDSNEEDTOBEFREE;
+							}
 						} else {
 							ret = RETURNVALUE_NOERROR;
 						}
+					}
+				} else if (slotPosition & SLOTP_TWO_HAND) {
+					if (inventory[CONST_SLOT_LEFT] && inventory[CONST_SLOT_LEFT] != item) {
+						ret = RETURNVALUE_BOTHHANDSNEEDTOBEFREE;
 					} else {
 						ret = RETURNVALUE_NOERROR;
 					}
-				}
-			} else if (slotPosition & SLOTP_TWO_HAND) {
-				if (inventory[CONST_SLOT_LEFT] && inventory[CONST_SLOT_LEFT] != item) {
-					ret = RETURNVALUE_BOTHHANDSNEEDTOBEFREE;
-				} else {
-					ret = RETURNVALUE_NOERROR;
-				}
-			} else if (inventory[CONST_SLOT_LEFT]) {
-				const Item* leftItem = inventory[CONST_SLOT_LEFT];
-				WeaponType_t type = item->getWeaponType(), leftType = leftItem->getWeaponType();
+				} else if (inventory[CONST_SLOT_LEFT]) {
+					const Item* leftItem = inventory[CONST_SLOT_LEFT];
+					WeaponType_t type = item->getWeaponType(), leftType = leftItem->getWeaponType();
 
 				if (leftItem->getSlotPosition() & SLOTP_TWO_HAND) {
 					ret = RETURNVALUE_DROPTWOHANDEDITEM;
@@ -3032,27 +3037,28 @@ ReturnValue Player::queryAdd(int32_t index, const Thing &thing, uint32_t count, 
 
 		case CONST_SLOT_LEFT: {
 			if (slotPosition & SLOTP_LEFT) {
-				WeaponType_t type = item->getWeaponType();
-				if (type == WEAPON_NONE || type == WEAPON_SHIELD || type == WEAPON_AMMO) {
-					ret = RETURNVALUE_CANNOTBEDRESSED;
-				} else if (inventory[CONST_SLOT_RIGHT] && (slotPosition & SLOTP_TWO_HAND)) {
-					if (type == WEAPON_DISTANCE && inventory[CONST_SLOT_RIGHT]->isQuiver()) {
-						ret = RETURNVALUE_NOERROR;
+
+					WeaponType_t type = item->getWeaponType();
+					if (type == WEAPON_NONE || type == WEAPON_SHIELD || type == WEAPON_AMMO) {
+						ret = RETURNVALUE_CANNOTBEDRESSED;
+					} else if (inventory[CONST_SLOT_RIGHT] && (slotPosition & SLOTP_TWO_HAND)) {
+						if (type == WEAPON_DISTANCE && inventory[CONST_SLOT_RIGHT]->isQuiver()) {
+							ret = RETURNVALUE_NOERROR;
+						} else {
+							ret = RETURNVALUE_BOTHHANDSNEEDTOBEFREE;
+						}
 					} else {
-						ret = RETURNVALUE_BOTHHANDSNEEDTOBEFREE;
+						ret = RETURNVALUE_NOERROR;
 					}
-				} else {
-					ret = RETURNVALUE_NOERROR;
-				}
-			} else if (slotPosition & SLOTP_TWO_HAND) {
-				if (inventory[CONST_SLOT_RIGHT] && inventory[CONST_SLOT_RIGHT] != item) {
-					ret = RETURNVALUE_BOTHHANDSNEEDTOBEFREE;
-				} else {
-					ret = RETURNVALUE_NOERROR;
-				}
-			} else if (inventory[CONST_SLOT_RIGHT]) {
-				const Item* rightItem = inventory[CONST_SLOT_RIGHT];
-				WeaponType_t type = item->getWeaponType(), rightType = rightItem->getWeaponType();
+				} else if (slotPosition & SLOTP_TWO_HAND) {
+					if (inventory[CONST_SLOT_RIGHT] && inventory[CONST_SLOT_RIGHT] != item) {
+						ret = RETURNVALUE_BOTHHANDSNEEDTOBEFREE;
+					} else {
+						ret = RETURNVALUE_NOERROR;
+					}
+				} else if (inventory[CONST_SLOT_RIGHT]) {
+					const Item* rightItem = inventory[CONST_SLOT_RIGHT];
+					WeaponType_t type = item->getWeaponType(), rightType = rightItem->getWeaponType();
 
 				if (rightItem->getSlotPosition() & SLOTP_TWO_HAND) {
 					ret = RETURNVALUE_DROPTWOHANDEDITEM;
@@ -3546,7 +3552,9 @@ void Player::stashContainer(StashContainerList itemDict) {
 	}
 }
 
-bool Player::removeItemOfType(uint16_t itemId, uint32_t amount, int32_t subType, bool ignoreEquipped /* = false*/, bool removeFromStash /* = false*/) {
+
+
+bool Player::removeItemOfType(uint16_t itemId, uint32_t amount, int32_t subType, bool ignoreEquipped /* = false*/, bool removeFromStash /* = false*/)  {
 	if (amount == 0) {
 		return true;
 	}
@@ -3560,6 +3568,8 @@ bool Player::removeItemOfType(uint16_t itemId, uint32_t amount, int32_t subType,
 		if (!item) {
 			continue;
 		}
+
+		Player* player = item->getHoldingPlayer();
 
 		if (!ignoreEquipped && item->getID() == itemId) {
 			uint32_t itemCount = Item::countByType(item, subType);
@@ -3610,7 +3620,7 @@ bool Player::removeItemOfType(uint16_t itemId, uint32_t amount, int32_t subType,
 	return false;
 }
 
-ItemsTierCountList Player::getInventoryItemsId() const {
+ItemsTierCountListPlayer::getInventoryItemsId() const {
 	ItemsTierCountList itemMap;
 	for (int32_t i = CONST_SLOT_FIRST; i <= CONST_SLOT_LAST; i++) {
 		Item* item = inventory[i];
@@ -3761,8 +3771,7 @@ std::map<uint16_t, uint16_t> &Player::getAllSaleItemIdAndCount(std::map<uint16_t
 	return countMap;
 }
 
-StashItemList Player::getInventoryItemsId() const
-{
+StashItemList Player::getInventoryItemsId() const {
 	StashItemList itemMap;
 	for (int32_t i = CONST_SLOT_FIRST; i <= CONST_SLOT_LAST; i++) {
 		if (i == CONST_SLOT_STORE_INBOX) {
@@ -3777,9 +3786,7 @@ StashItemList Player::getInventoryItemsId() const
 		auto rootSearch = itemMap.find(item->getID());
 		if (rootSearch != itemMap.end()) {
 			itemMap[item->getID()] += Item::countByType(item, -1);
-		}
-		else
-		{
+		} else {
 			itemMap.emplace(item->getID(), Item::countByType(item, -1));
 		}
 
@@ -3788,9 +3795,7 @@ StashItemList Player::getInventoryItemsId() const
 				auto containerSearch = itemMap.find((*it)->getID());
 				if (containerSearch != itemMap.end()) {
 					itemMap[(*it)->getID()] += Item::countByType(*it, -1);
-				}
-				else
-				{
+				} else {
 					itemMap.emplace((*it)->getID(), Item::countByType(*it, -1));
 				}
 				itemMap.emplace((*it)->getID(), Item::countByType(*it, -1));
@@ -3800,8 +3805,7 @@ StashItemList Player::getInventoryItemsId() const
 	return itemMap;
 }
 
-StashItemList Player::getStoreInboxItemsId() const
-{
+StashItemList Player::getStoreInboxItemsId() const {
 	StashItemList itemMap;
 	Item* item = inventory[CONST_SLOT_STORE_INBOX];
 	if (!item) {
@@ -3829,8 +3833,7 @@ StashItemList Player::getStoreInboxItemsId() const
 	return itemMap;
 }
 
-StashItemList Player::getDepotItemsIds()
-{
+StashItemList Player::getDepotItemsIds() {
 	StashItemList itemMap;
 	for (uint32_t i = g_configManager().getNumber(DEPOT_BOXES); i > 0; i--) {
 		DepotChest* depotChest = getDepotChest(i, false);
@@ -3856,8 +3859,7 @@ StashItemList Player::getDepotItemsIds()
 	return itemMap;
 }
 
-StashItemList Player::getInboxItemsIds()
-{
+StashItemList Player::getInboxItemsIds() {
 	StashItemList itemMap;
 	if (!inbox) {
 		return itemMap;
@@ -3880,25 +3882,25 @@ StashItemList Player::getInboxItemsIds()
 
 void Player::getAllItemTypeCountAndSubtype(std::map<uint32_t, uint32_t> &countMap) const {
 	for (const auto item : getAllInventoryItems()) {
+
 		uint16_t itemId = item->getID();
 		if (Item::items[itemId].isFluidContainer()) {
 			countMap[static_cast<uint32_t>(itemId) | (item->getAttribute<uint32_t>(ItemAttribute_t::FLUIDTYPE)) << 16] += item->getItemCount();
 		} else {
 			countMap[static_cast<uint32_t>(itemId)] += item->getItemCount();
 		}
+}
+		}
+
+				Item* Player::getForgeItemFromId(uint16_t itemId, uint8_t tier) {
+					for (auto item : getAllInventoryItems(true)) {
+		if (item->hasImbuements()) {
+				continue;
+		}
+					if (item->getID() == itemId && item->getTier() == tier) {
+			return item;
 	}
 }
-
-Item* Player::getForgeItemFromId(uint16_t itemId, uint8_t tier) {
-	for (auto item : getAllInventoryItems(true)) {
-		if (item->hasImbuements()) {
-			continue;
-		}
-
-		if (item->getID() == itemId && item->getTier() == tier) {
-			return item;
-		}
-	}
 
 	return nullptr;
 }
@@ -4490,7 +4492,7 @@ bool Player::onKilledCreature(Creature* target, bool lastHit /* = true*/) {
 			}
 		}
 	} else if (const Monster* monster = target->getMonster()) {
-		// Access to the monster's map damage to check if the player attacked it
+			   // Access to the monster's map damage to check if the player attacked it
 		for (auto [playerId, damage] : monster->getDamageMap()) {
 			auto damagePlayer = g_game().getPlayerByID(playerId);
 			if (!damagePlayer) {
@@ -4507,13 +4509,11 @@ bool Player::onKilledCreature(Creature* target, bool lastHit /* = true*/) {
 			TaskHuntingSlot* taskSlot = damagePlayer->getTaskHuntingWithCreature(monster->getRaceId());
 			if (!taskSlot || monster->isSummon()) {
 				continue;
-			}
-
-			if (const TaskHuntingOption* option = g_ioprey().GetTaskRewardOption(taskSlot)) {
-				taskSlot->currentKills += 1;
-				if ((taskSlot->upgrade && taskSlot->currentKills >= option->secondKills) || (!taskSlot->upgrade && taskSlot->currentKills >= option->firstKills)) {
-					taskSlot->state = PreyTaskDataState_Completed;
-					std::string message = "You succesfully finished your hunting task. Your reward is ready to be claimed!";
+			}if (const TaskHuntingOption* option = g_ioprey().GetTaskRewardOption(taskSlot)) {
+			taskSlot->currentKills += 1;
+			if ((taskSlot->upgrade && taskSlot->currentKills >= option->secondKills) || (!taskSlot->upgrade && taskSlot->currentKills >= option->firstKills)) {
+				taskSlot->state = PreyTaskDataState_Completed;
+				std::string message = "You succesfully finished your hunting task. Your reward is ready to be claimed!";
 					damagePlayer->sendTextMessage(MESSAGE_STATUS, message);
 				}
 				damagePlayer->reloadTaskSlot(taskSlot->id);
@@ -6040,7 +6040,8 @@ void Player::triggerMomentum() {
 	if (getZone() != ZONE_PROTECTION && hasCondition(CONDITION_INFIGHT) && ((OTSYS_TIME() / 1000) % 2) == 0 && chance > 0 && randomChance < chance) {
 		bool triggered = false;
 		auto it = conditions.begin();
-		while (it != conditions.end()) {
+		while (
+		it != conditions.end()) {
 			auto condItem = *it;
 			ConditionType_t type = condItem->getType();
 			uint32_t spellId = condItem->getSubId();
@@ -6054,8 +6055,8 @@ void Player::triggerMomentum() {
 			++it;
 		}
 		if (triggered) {
-			g_game().addMagicEffect(getPosition(), CONST_ME_HOURGLASS);
-			sendTextMessage(MESSAGE_ATTENTION, "Momentum was triggered.");
+	g_game().addMagicEffect(getPosition(), CONST_ME_HOURGLASS);
+			sendTextMessage(MESSAGE_ATTENTION, "Momentum was triggered.") ;
 		}
 	}
 }
@@ -6176,11 +6177,8 @@ void Player::retrieveAllItemsFromDepotSearch(uint16_t itemId, uint8_t tier, bool
 	std::vector<Item*> itemsVector;
 	for (Item* locker : depotLocker->getItemList()) {
 		const Container* c = locker->getContainer();
-		if (!c || c->empty() ||
-			// Retrieve from inbox.
-			(c->isInbox() && isDepot) ||
-			// Retrieve from depot.
-			(!c->isInbox() && !isDepot)) {
+		if (!c || c->empty() ||  // Retrieve from inbox.
+			(c->isInbox() && isDepot) || // Retrieve from depot.(!c->isInbox() && !isDepot)) {
 			continue;
 		}
 

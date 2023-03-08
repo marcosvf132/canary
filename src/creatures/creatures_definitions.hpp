@@ -900,29 +900,29 @@ struct PartyAnalyzer {
 };
 
 struct Achievement {
-	Achievement() {}
+		Achievement() { }
 
-	std::string name;
-	std::string description;
+		std::string name;
+		std::string description;
 
-	bool secret = false;
+		bool secret = false;
 
-	uint8_t grade = 0;
-	uint8_t points = 0;
+		uint8_t grade = 0;
+		uint8_t points = 0;
 
-	uint16_t id = 0;
+		uint16_t id = 0;
 };
 
 struct PlayerTitle {
-	PlayerTitle() {}
+		PlayerTitle() { }
 
-	std::string maleName;
-	std::string femaleName;
-	std::string description;
+		std::string maleName;
+		std::string femaleName;
+		std::string description;
 
-	bool permanent = false;
+		bool permanent = false;
 
-	uint16_t id = 0;
+		uint16_t id = 0;
 };
 
 #endif // SRC_CREATURES_CREATURES_DEFINITIONS_HPP_

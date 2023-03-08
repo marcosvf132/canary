@@ -561,7 +561,8 @@ class Player final : public Creature, public Cylinder {
 		void addMessageBuffer();
 		void removeMessageBuffer();
 
-		bool removeItemOfType(uint16_t itemId, uint32_t amount, int32_t subType, bool ignoreEquipped = false, bool removeFromStash = false);
+		bool canSellImbuedItem(Item *item, bool ignoreImbued);
+		bool removeItemOfType(uint16_t itemId, uint32_t amount, int32_t subType, bool ignoreEquipped = false, bool removeFromStash = false, bool ignoreImbued = true);
 
 		void addItemOnStash(uint16_t itemId, uint32_t amount) {
 			auto it = stashItems.find(itemId);
@@ -1086,6 +1087,43 @@ class Player final : public Creature, public Cylinder {
 
 		void openPlayerContainers();
 
+		// store
+		void sendOpenStore(uint8_t serviceType) {
+			if (client) {
+				client->sendOpenStore(serviceType);
+			}
+		}
+
+		void sendShowStoreCategoryOffers(StoreCategory* category) {
+			if (client) {
+				client->sendStoreCategoryOffers(category);
+			}
+		}
+
+		void sendStoreError(GameStoreError_t error, const std::string &errorMessage) {
+			if (client) {
+				client->sendStoreError(error, errorMessage);
+			}
+		}
+
+		void sendStorePurchaseSuccessful(const std::string &message, const uint32_t newCoinBalance) {
+			if (client) {
+				client->sendStorePurchaseSuccessful(message, newCoinBalance);
+			}
+		}
+
+		void sendStoreRequestAdditionalInfo(uint32_t offerId, ClientOffer_t clientOfferType) {
+			if (client) {
+				client->sendStoreRequestAdditionalInfo(offerId, clientOfferType);
+			}
+		}
+
+		void sendStoreTrasactionHistory(HistoryStoreOfferList &list, uint32_t page, uint8_t entriesPerPage) {
+			if (client) {
+				client->sendStoreTrasactionHistory(list, page, entriesPerPage);
+			}
+		}
+
 		// Quickloot
 		void sendLootContainers() {
 			if (client) {
@@ -1257,6 +1295,11 @@ class Player final : public Creature, public Cylinder {
 				client->sendTextWindow(windowTextId, item, maxlen, canWrite);
 			}
 		}
+		void sendTextWindow(uint32_t itemId, const std::string &text) const {
+			if (client) {
+				client->sendTextWindow(windowTextId, itemId, text);
+			}
+		}
 		void sendToChannel(const Creature* creature, SpeakClasses type, const std::string &text, uint16_t channelId) const {
 			if (client) {
 				client->sendToChannel(creature, type, text, channelId);
@@ -1267,7 +1310,7 @@ class Player final : public Creature, public Cylinder {
 				client->sendShop(npc);
 			}
 		}
-		void sendSaleItemList(const std::map<uint16_t, uint16_t> &inventoryMap) const {
+		void sendSaleItemList(const std::map<uint32_t, uint32_t> &inventoryMap) const {
 			if (client && shopOwner) {
 				client->sendSaleItemList(shopOwner->getShopItemVector(), inventoryMap);
 			}
@@ -1438,8 +1481,7 @@ class Player final : public Creature, public Cylinder {
 				client->sendCyclopediaCharacterAchievements(secretsUnlocked, achievementsUnlocked);
 			}
 		}
-		void sendCyclopediaCharacterItemSummary(StashItemList inventoryItems, StashItemList storeInboxItems, StashItemList supplyStashItems,
-											StashItemList depotBoxItems, StashItemList inboxItems) {
+		void sendCyclopediaCharacterItemSummary(StashItemList inventoryItems, StashItemList storeInboxItems, StashItemList supplyStashItems, StashItemList depotBoxItems, StashItemList inboxItems) {
 			if (client) {
 				client->sendCyclopediaCharacterItemSummary(inventoryItems, storeInboxItems, supplyStashItems, depotBoxItems, inboxItems);
 			}
@@ -1474,7 +1516,7 @@ class Player final : public Creature, public Cylinder {
 				client->sendHighscoresNoData();
 			}
 		}
-		void sendHighscores(const std::vector<HighscoreCharacter>& characters, uint8_t type, uint8_t category, uint32_t vocation, uint16_t page, uint8_t entriesPerPage) {
+		void sendHighscores(const std::vector<HighscoreCharacter> &characters, uint8_t type, uint8_t category, uint32_t vocation, uint16_t page, uint8_t entriesPerPage) {
 			if (client) {
 				client->sendHighscores(characters, type, category, vocation, page, entriesPerPage);
 			}
@@ -2296,7 +2338,8 @@ class Player final : public Creature, public Cylinder {
 
 			if (auto it = std::find_if(achievementsUnlocked.begin(), achievementsUnlocked.end(), [id](auto achievement_it) {
 					return achievement_it.first == id;
-				}); it != achievementsUnlocked.end()) {
+				});
+				it != achievementsUnlocked.end()) {
 				return true;
 			}
 
@@ -2442,7 +2485,8 @@ class Player final : public Creature, public Cylinder {
 		bool isTitleUnlocked(uint8_t id) const {
 			if (auto it = std::find_if(titles.begin(), titles.end(), [id](uint8_t title_it) {
 					return title_it == id;
-				}); it != titles.end()) {
+				});
+				it != titles.end()) {
 				return true;
 			}
 
@@ -2463,7 +2507,8 @@ class Player final : public Creature, public Cylinder {
 		bool hasBadge(uint8_t id) const {
 			if (auto it = std::find_if(badges.begin(), badges.end(), [id](uint8_t badge_it) {
 					return badge_it == id;
-				}); it != badges.end()) {
+				});
+				it != badges.end()) {
 				return true;
 			}
 
@@ -2478,6 +2523,19 @@ class Player final : public Creature, public Cylinder {
 		}
 		std::map<uint8_t, std::vector<uint16_t>> getAccountLevelVocation() const {
 			return accountLevelSummary;
+		}
+
+		// Depot search system
+		void requestDepotItems();
+		void requestDepotSearchItem(uint16_t itemId, uint8_t tier);
+		void retrieveAllItemsFromDepotSearch(uint16_t itemId, uint8_t tier, bool isDepot);
+		void openContainerFromDepotSearch(const Position &pos);
+		Item* getItemFromDepotSearch(uint16_t itemId, const Position &pos);
+		bool isDepotSearchExhausted() const {
+			return (OTSYS_TIME() - lastDepotSearchInteraction < 1000);
+		}
+		void updateDepotSearchExhausted() {
+			lastDepotSearchInteraction = OTSYS_TIME();
 		}
 
 	private:
@@ -2533,11 +2591,10 @@ class Player final : public Creature, public Cylinder {
 		size_t getLastIndex() const override;
 		uint32_t getItemTypeCount(uint16_t itemId, int32_t subType = -1) const override;
 		void stashContainer(StashContainerList itemDict);
-		std::map<uint32_t, uint32_t>& getAllItemTypeCount(std::map<uint32_t,
-                                      uint32_t>& countMap) const override;
+		std::map<uint32_t, uint32_t> &getAllItemTypeCount(std::map<uint32_t, uint32_t> &countMap) const override;
 		StashItemList getInventoryItemsId() const;
 		StashItemList getStoreInboxItemsId() const;
-		void getAllItemTypeCountAndSubtype(std::map<uint32_t, uint32_t>& countMap) const;
+		void getAllItemTypeCountAndSubtype(std::map<uint32_t, uint32_t> &countMap) const;
 		ItemsTierCountList getInventoryItemsId() const;
 
 		// Get specific inventory item from itemid

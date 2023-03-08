@@ -103,6 +103,7 @@ bool IOLoginData::preloadPlayer(Player* player, const std::string &name) {
 	if (!group) {
 		SPDLOG_ERROR("Player {} has group id {} which doesn't exist", player->name, result->getNumber<uint16_t>("group_id"));
 		return false;
+
 	}
 	player->setGroup(group);
 	player->accountNumber = result->getNumber<uint32_t>("account_id");
@@ -114,11 +115,11 @@ bool IOLoginData::preloadPlayer(Player* player, const std::string &name) {
 	}
 
 	/*
-	Loyalty system:
-	- If creation timestamp is 0, that means it's the first time the player is trying to login on this account.
-	- Since it's the first login, we must update the database manually.
-	- This should be handled by the account manager, but not all of then do it so we handle it by ourself.
-  */
+	  Loyalty system:
+	  - If creation timestamp is 0, that means it's the first time the player is trying to login on this account.
+	  - Since it's the first login, we must update the database manually.
+	  - This should be handled by the account manager, but not all of then do it so we handle it by ourself.
+	*/
 	time_t creation = result->getNumber<time_t>("creation_timestamp");
 	if (creation == 0) {
 		query.str(std::string());
@@ -519,10 +520,9 @@ bool IOLoginData::loadPlayer(Player* player, DBResult_ptr result) {
 		player->internalAddThing(CONST_SLOT_STORE_INBOX, Item::CreateItem(ITEM_STORE_INBOX));
 	}
 
-	IOLoginDataLoad::loadRewardItems(player);
-
-	// load depot items
+	IOLoginDataLoad::loadRewardItems(player);// load depot items
 	itemMap.clear();
+
 	query.str(std::string());
 	query << "SELECT `pid`, `sid`, `itemtype`, `count`, `attributes` FROM `player_depotitems` WHERE `player_id` = " << player->getGUID() << " ORDER BY `sid` DESC";
 	if ((result = db.storeQuery(query.str()))) {
@@ -554,8 +554,9 @@ bool IOLoginData::loadPlayer(Player* player, DBResult_ptr result) {
 		}
 	}
 
-	// load inbox items
+	//  load inbox items
 	itemMap.clear();
+
 	query.str(std::string());
 	query << "SELECT `pid`, `sid`, `itemtype`, `count`, `attributes` FROM `player_inboxitems` WHERE `player_id` = " << player->getGUID() << " ORDER BY `sid` DESC";
 	if ((result = db.storeQuery(query.str()))) {
@@ -644,9 +645,7 @@ bool IOLoginData::loadPlayer(Player* player, DBResult_ptr result) {
 	}
 
 	IOLoginDataLoad::loadPlayerForgeHistory(player, result);
-	IOLoginDataLoad::loadPlayerBosstiary(player, result);
-
-	// Load task hunting class
+	IOLoginDataLoad::loadPlayerBosstiary(player, result);// Load task hunting class
 	if (g_configManager().getBoolean(TASK_HUNTING_ENABLED)) {
 		query.str(std::string());
 		query << "SELECT * FROM `player_taskhunt` WHERE `player_id` = " << player->getGUID();
@@ -688,38 +687,38 @@ bool IOLoginData::loadPlayer(Player* player, DBResult_ptr result) {
 			} while (result->next());
 		}
 	}
+
 	loadPlayerBadgeSystem(player);
-    loadplayersummary(player);
-    loadplayerdeathhistory(player);
-    player->initializePrey();
+	loadplayersummary(player);
+	loadplayerdeathhistory(player);
+	player->initializePrey();
 	player->initializeTaskHunting();
 	player->updateBaseSpeed();
 	player->updateInventoryWeight();
+
 	player->updateItemsLight(true);
 	return true;
 }
 
-void IOLoginData::loadPlayerBadgeSystem(Player* player)
-{
-  DBResult_ptr result;
-  std::ostringstream query;
-  Database& db = Database::getInstance();
-
-  query << "SELECT `level`, `vocation` FROM `players` WHERE `account_id` = " << player->getAccount();
-  if (result = db.storeQuery(query.str())) {
-    do {
-      uint16_t vocation = result->getNumber<uint16_t>("vocation");
-      uint16_t level = result->getNumber<uint16_t>("level");
-      player->accountLevelSummary[static_cast<uint8_t>(vocation)].emplace_back(level);
-    } while (result->next());
-  }
-}
-
-void IOLoginData::loadPlayerSummary(Player* player)
-{
+void IOLoginData::loadPlayerBadgeSystem(Player* player) {
 	DBResult_ptr result;
 	std::ostringstream query;
-	Database& db = Database::getInstance();
+	Database &db = Database::getInstance();
+
+	query << "SELECT `level`, `vocation` FROM `players` WHERE `account_id` = " << player->getAccount();
+	if (result = db.storeQuery(query.str())) {
+		do {
+			uint16_t vocation = result->getNumber<uint16_t>("vocation");
+			uint16_t level = result->getNumber<uint16_t>("level");
+			player->accountLevelSummary[static_cast<uint8_t>(vocation)].emplace_back(level);
+		} while (result->next());
+	}
+}
+
+void IOLoginData::loadPlayerSummary(Player* player) {
+	DBResult_ptr result;
+	std::ostringstream query;
+	Database &db = Database::getInstance();
 
   // Load death history
   query << "SELECT * FROM `player_summary` WHERE `player_id` = " << player->getGUID();
@@ -780,14 +779,12 @@ void IOLoginData::loadPlayerSummary(Player* player)
 		query << "INSERT INTO `player_summary` (`player_id`) VALUES (" << player->getGUID() << ')';
 		Database::getInstance().executeQuery(query.str());
 	}
-
 }
 
-void IOLoginData::loadPlayerDeathHistory(Player* player)
-{
+void IOLoginData::loadPlayerDeathHistory(Player* player) {
 	DBResult_ptr result;
 	std::ostringstream query;
-	Database& db = Database::getInstance();
+	Database &db = Database::getInstance();
 
 	// Load death history
 	query << "SELECT `time`, `level`, `killed_by`, `mostdamage_by` FROM `player_deaths` WHERE `player_id` = " << player->getGUID();
@@ -798,7 +795,7 @@ void IOLoginData::loadPlayerDeathHistory(Player* player)
 			std::ostringstream description;
 			description << "Died at Level " << result->getNumber<uint32_t>("level") << " by";
 			if (!cause1.empty()) {
-				const char& character = cause1.front();
+				const char &character = cause1.front();
 				if (character == 'a' || character == 'e' || character == 'i' || character == 'o' || character == 'u') {
 					description << " an ";
 				} else {
@@ -812,7 +809,7 @@ void IOLoginData::loadPlayerDeathHistory(Player* player)
 					description << " and ";
 				}
 
-				const char& character = cause2.front();
+				const char &character = cause2.front();
 				if (character == 'a' || character == 'e' || character == 'i' || character == 'o' || character == 'u') {
 					description << " an ";
 				} else {
@@ -828,7 +825,7 @@ void IOLoginData::loadPlayerDeathHistory(Player* player)
 
 	// Load pvp kills
 	query.str(std::string());
-	const std::string& escapedName = db.escapeString(player->getName());
+	const std::string &escapedName = db.escapeString(player->getName());
 	query << "SELECT `d`.`time`, `d`.`killed_by`, `d`.`mostdamage_by`, `d`.`unjustified`, `d`.`mostdamage_unjustified`, `p`.`name` FROM `player_deaths` AS `d` INNER JOIN `players` AS `p` ON `d`.`player_id` = `p`.`id` WHERE ((`d`.`killed_by` = " << escapedName << " AND `d`.`is_player` = 1) OR (`d`.`mostdamage_by` = " << escapedName << " AND `d`.`mostdamage_is_player` = 1))";
 	if (result = db.storeQuery(query.str())) {
 		std::string cause1 = result->getString("killed_by");
@@ -850,7 +847,6 @@ void IOLoginData::loadPlayerDeathHistory(Player* player)
 		description << "Killed " << name << '.';
 		player->insertPvpKillOnHistory(std::move(description.str()), result->getNumber<uint32_t>("time"), status);
 	}
-
 }
 
 bool IOLoginData::saveItems(const Player* player, const ItemBlockList &itemList, DBInsert &query_insert, PropWriteStream &propWriteStream) {
@@ -1246,9 +1242,12 @@ bool IOLoginData::savePlayer(Player* player) {
 	}
 
 	if (!IOLoginDataSave::saveRewardItems(player)) {
-		SPDLOG_ERROR("[{}] failed to save reward items");
+		SPDLOG_ERROR("[{}] failed to save reward items
+	");
 		return false;
 	}
+
+
 
 	// save inbox items
 	query.str(std::string());
@@ -1350,9 +1349,7 @@ bool IOLoginData::savePlayer(Player* player) {
 	}
 
 	IOLoginDataSave::savePlayerForgeHistory(player);
-	IOLoginDataSave::savePlayerBosstiary(player);
-
-	query.str(std::string());
+	IOLoginDataSave::savePlayerBosstiary(player);query.str(std::string());
 	query << "DELETE FROM `player_storage` WHERE `player_id` = " << player->getGUID();
 	if (!db.executeQuery(query.str())) {
 		return false;
@@ -1392,99 +1389,92 @@ std::string IOLoginData::getNameByGuid(uint32_t guid) {
 	return result->getString("name");
 }
 
-bool IOLoginData::savePlayerSummary(const Player* player)
-{
-  std::ostringstream query;
-  Database& db = Database::getInstance();
+bool IOLoginData::savePlayerSummary(const Player* player) {
+	std::ostringstream query;
+	Database &db = Database::getInstance();
 
-  // Player store summary
-  query.str(std::string());
-  query << "UPDATE `player_summary` SET ";
-  query << "`title` = " << static_cast<uint16_t>(player->getCurrentTitle()) << ',';
-  query << "`charms` = " << player->getCharmsPointsObtained() << ',';
-  query << "`goshnar` = " << player->getGoshnarTaintsObtained() << ',';
-  query << "`drome` = " << player->getDromePointsObtained() << ',';
-  query << "`xp_boosts` = " << player->getXpBoostsObtained() << ',';
-  query << "`rewards_collection` = " << player->getRewardCollectionObtained() << ',';
-  query << "`hirelings` = " << player->getHirelingsObtained() << ',';
-  query << "`prey_cards` = " << player->getPreyCardsObtained() << ',';
-  query << "`achievements_points` = " << player->getAchievementsPoints() << ',';
-  query << "`login_streak` = " << player->getLoginStreak() << ',';
-  query << "`task_points` = " << player->getTaskHuntingPointsObtained() << ',';
-  query << "`map_area` = " << player->getMapAreaDiscoveredPercentage() << ',';
+	// Player store summary
+	query.str(std::string());
+	query << "UPDATE `player_summary` SET ";
+	query << "`title` = " << static_cast<uint16_t>(player->getCurrentTitle()) << ',';
+	query << "`charms` = " << player->getCharmsPointsObtained() << ',';
+	query << "`goshnar` = " << player->getGoshnarTaintsObtained() << ',';
+	query << "`drome` = " << player->getDromePointsObtained() << ',';
+	query << "`xp_boosts` = " << player->getXpBoostsObtained() << ',';
+	query << "`rewards_collection` = " << player->getRewardCollectionObtained() << ',';
+	query << "`hirelings` = " << player->getHirelingsObtained() << ',';
+	query << "`prey_cards` = " << player->getPreyCardsObtained() << ',';
+	query << "`achievements_points` = " << player->getAchievementsPoints() << ',';
+	query << "`login_streak` = " << player->getLoginStreak() << ',';
+	query << "`task_points` = " << player->getTaskHuntingPointsObtained() << ',';
+	query << "`map_area` = " << player->getMapAreaDiscoveredPercentage() << ',';
 
-  // Hirelings outfits purchased
-  PropWriteStream propHirelingOutfitsStream;
-  for (const auto lookType_it : player->getHirelinsOutfitsObtained()) {
-   propHirelingOutfitsStream.write<uint16_t>(lookType_it);
-  }
-  size_t hirelingOutfitsSize;
-  const char* hirelingOutfitsList = propHirelingOutfitsStream.getStream(hirelingOutfitsSize);
-  query << " `hireling_outfits` = " << db.escapeBlob(hirelingOutfitsList, hirelingOutfitsSize) << ',';
+	// Hirelings outfits purchased
+	PropWriteStream propHirelingOutfitsStream;
+	for (const auto lookType_it : player->getHirelinsOutfitsObtained()) {
+		propHirelingOutfitsStream.write<uint16_t>(lookType_it);
+	}
+	size_t hirelingOutfitsSize;
+	const char* hirelingOutfitsList = propHirelingOutfitsStream.getStream(hirelingOutfitsSize);
+	query << " `hireling_outfits` = " << db.escapeBlob(hirelingOutfitsList, hirelingOutfitsSize) << ',';
 
+	// Hirelings jobs purchased
+	PropWriteStream propHirelingJobsStream;
+	for (const auto job_it : player->getHirelinsJobsObtained()) {
+		propHirelingJobsStream.write<uint16_t>(static_cast<uint16_t>(job_it));
+	}
+	size_t hirelingJobsSize;
+	const char* hirelingJobsList = propHirelingJobsStream.getStream(hirelingJobsSize);
+	query << " `hireling_jobs` = " << db.escapeBlob(hirelingJobsList, hirelingJobsSize) << ',';
 
-  // Hirelings jobs purchased
-  PropWriteStream propHirelingJobsStream;
-  for (const auto job_it : player->getHirelinsJobsObtained()) {
-   propHirelingJobsStream.write<uint16_t>(static_cast<uint16_t>(job_it));
-  }
-  size_t hirelingJobsSize;
-  const char* hirelingJobsList = propHirelingJobsStream.getStream(hirelingJobsSize);
-  query << " `hireling_jobs` = " << db.escapeBlob(hirelingJobsList, hirelingJobsSize) << ',';
+	// House items purchased
+	PropWriteStream propHouseItemsStream;
+	for (const auto item_it : player->getHouseItemsObtained()) {
+		propHouseItemsStream.write<uint16_t>(item_it.first);
+		propHouseItemsStream.write<uint32_t>(item_it.second);
+	}
+	size_t houseItemsSize;
+	const char* houseItemsList = propHouseItemsStream.getStream(houseItemsSize);
+	query << " `house_items` = " << db.escapeBlob(houseItemsList, houseItemsSize) << ',';
 
+	// Blessings purchased
+	PropWriteStream propBlessingsStream;
+	for (const auto bless_it : player->getBlessingsObtained()) {
+		propBlessingsStream.write<uint16_t>(static_cast<uint16_t>(bless_it.first));
+		propBlessingsStream.write<uint16_t>(bless_it.first);
+	}
+	size_t blessingsSize;
+	const char* blessingsList = propBlessingsStream.getStream(blessingsSize);
+	query << " `blessings` = " << db.escapeBlob(blessingsList, blessingsSize) << ',';
 
-  // House items purchased
-  PropWriteStream propHouseItemsStream;
-  for (const auto item_it : player->getHouseItemsObtained()) {
-   propHouseItemsStream.write<uint16_t>(item_it.first);
-   propHouseItemsStream.write<uint32_t>(item_it.second);
-  }
-  size_t houseItemsSize;
-  const char* houseItemsList = propHouseItemsStream.getStream(houseItemsSize);
-  query << " `house_items` = " << db.escapeBlob(houseItemsList, houseItemsSize) << ',';
+	// Achievements unlocked
+	PropWriteStream propAchievementsStream;
+	for (const auto achievementPair : player->getAchievementsUnlocked()) {
+		propAchievementsStream.write<uint16_t>(achievementPair.first);
+		propAchievementsStream.write<uint32_t>(achievementPair.second);
+	}
+	size_t unlockedsSize;
+	const char* unlockedsList = propAchievementsStream.getStream(unlockedsSize);
+	query << " `achievements_unlockeds` = " << db.escapeBlob(unlockedsList, unlockedsSize);
 
+	query << " WHERE `player_id` = " << player->getGUID();
 
-  // Blessings purchased
-  PropWriteStream propBlessingsStream;
-  for (const auto bless_it : player->getBlessingsObtained()) {
-   propBlessingsStream.write<uint16_t>(static_cast<uint16_t>(bless_it.first));
-   propBlessingsStream.write<uint16_t>(bless_it.first);
-  }
-  size_t blessingsSize;
-  const char* blessingsList = propBlessingsStream.getStream(blessingsSize);
-  query << " `blessings` = " << db.escapeBlob(blessingsList, blessingsSize) << ',';
+	if (!db.executeQuery(query.str())) {
+		SPDLOG_WARN("[IOLoginData::savePlayerStoreTransactionSummary] - Error saving store transactions summary from player: {}", player->getName());
+		return false;
+	}
 
-
-  // Achievements unlocked
-  PropWriteStream propAchievementsStream;
-  for (const auto achievementPair : player->getAchievementsUnlocked()) {
-   propAchievementsStream.write<uint16_t>(achievementPair.first);
-   propAchievementsStream.write<uint32_t>(achievementPair.second);
-  }
-  size_t unlockedsSize;
-  const char* unlockedsList = propAchievementsStream.getStream(unlockedsSize);
-  query << " `achievements_unlockeds` = " << db.escapeBlob(unlockedsList, unlockedsSize);
-
-
-  query << " WHERE `player_id` = " << player->getGUID();
-
-  if (!db.executeQuery(query.str())) {
-    SPDLOG_WARN("[IOLoginData::savePlayerStoreTransactionSummary] - Error saving store transactions summary from player: {}", player->getName());
-    return false;
-  }
-
-  return true;
+	return true;
 }
 
-std::string IOLoginData::getNameByGuid(uint32_t guid)
-{
-  std::ostringstream query;
-  query << "SELECT `name` FROM `players` WHERE `id` = " << guid;
-  DBResult_ptr result = Database::getInstance().storeQuery(query.str());
-  if (!result) {
-    return std::string();
-  }
-  return result->getString("name");
+std::string IOLoginData::getNameByGuid(uint32_t guid) {
+	std::ostringstream query;
+	query << "SELECT `name` FROM `players` WHERE `id` = " << guid;
+	DBResult_ptr result = Database::getInstance().storeQuery(query.str());
+	if (!result) {
+		return std::string();
+	}
+	return result->getString("name");
 
 uint32_t IOLoginData::getGuidByName(const std::string &name) {
 	Database &db = Database::getInstance();
@@ -1511,9 +1501,12 @@ bool IOLoginData::getGuidByNameEx(uint32_t &guid, bool &specialVip, std::string 
 	name = result->getString("name");
 	guid = result->getNumber<uint32_t>("id");
 	if (auto group = g_game().groups.getGroup(result->getNumber<uint16_t>("group_id"))) {
-		specialVip = group->flags[Groups::getFlagNumber(PlayerFlags_t::SpecialVIP)];
+
+	specialVip = group->
+		flags [Groups::getFlagNumber(PlayerFlags_t::SpecialVIP)];
 	} else {
 		specialVip = false;
+
 	}
 	return true;
 }
