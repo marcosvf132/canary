@@ -561,7 +561,7 @@ class Player final : public Creature, public Cylinder {
 		void addMessageBuffer();
 		void removeMessageBuffer();
 
-		bool canSellImbuedItem(Item *item, bool ignoreImbued);
+		bool canSellImbuedItem(Item* item, bool ignoreImbued);
 		bool removeItemOfType(uint16_t itemId, uint32_t amount, int32_t subType, bool ignoreEquipped = false, bool removeFromStash = false, bool ignoreImbued = true);
 
 		void addItemOnStash(uint16_t itemId, uint32_t amount) {

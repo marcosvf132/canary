@@ -135,28 +135,28 @@ enum Webhook_Colors_t : uint32_t {
 };
 
 const std::unordered_map<HighscoreCategories_t, std::string> highscoreCategoriesNames = {
-	{HIGHSCORE_CATEGORY_ACHIEVEMENTS, "Achievement Points"},
-	{HIGHSCORE_CATEGORY_AXE_FIGHTING, "Axe Fighting"},
-	{HIGHSCORE_CATEGORY_CHARMS, "Charm Points"},
-	{HIGHSCORE_CATEGORY_CLUB_FIGHTING, "Club Fighting"},
-	{HIGHSCORE_CATEGORY_EXPERIENCE, "Experience Points"},
-	{HIGHSCORE_CATEGORY_DISTANCE_FIGHTING, "Distance Fighting"},
-	{HIGHSCORE_CATEGORY_DROME, "Drome Score"},
-	{HIGHSCORE_CATEGORY_FISHING, "Fishing"},
-	{HIGHSCORE_CATEGORY_FIST_FIGHTING, "Fist Fighting"},
-	{HIGHSCORE_CATEGORY_GOSHNAR, "Goshnar's Taint"},
-	{HIGHSCORE_CATEGORY_LOYALTY, "Loyalty Points"},
-	{HIGHSCORE_CATEGORY_MAGIC_LEVEL, "Magic Level"},
-	{HIGHSCORE_CATEGORY_SHIELDING, "Shielding"},
-	{HIGHSCORE_CATEGORY_SWORD_FIGHTING, "Sword Fighting"},
+	{ HIGHSCORE_CATEGORY_ACHIEVEMENTS, "Achievement Points" },
+	{ HIGHSCORE_CATEGORY_AXE_FIGHTING, "Axe Fighting" },
+	{ HIGHSCORE_CATEGORY_CHARMS, "Charm Points" },
+	{ HIGHSCORE_CATEGORY_CLUB_FIGHTING, "Club Fighting" },
+	{ HIGHSCORE_CATEGORY_EXPERIENCE, "Experience Points" },
+	{ HIGHSCORE_CATEGORY_DISTANCE_FIGHTING, "Distance Fighting" },
+	{ HIGHSCORE_CATEGORY_DROME, "Drome Score" },
+	{ HIGHSCORE_CATEGORY_FISHING, "Fishing" },
+	{ HIGHSCORE_CATEGORY_FIST_FIGHTING, "Fist Fighting" },
+	{ HIGHSCORE_CATEGORY_GOSHNAR, "Goshnar's Taint" },
+	{ HIGHSCORE_CATEGORY_LOYALTY, "Loyalty Points" },
+	{ HIGHSCORE_CATEGORY_MAGIC_LEVEL, "Magic Level" },
+	{ HIGHSCORE_CATEGORY_SHIELDING, "Shielding" },
+	{ HIGHSCORE_CATEGORY_SWORD_FIGHTING, "Sword Fighting" },
 };
 
 // Structs
 struct HistoryStoreOffer {
-	uint32_t time;
-	uint8_t mode;
-	uint32_t amount;
-	std::string description;
+		uint32_t time;
+		uint8_t mode;
+		uint32_t amount;
+		std::string description;
 };
 
 using HistoryStoreOfferList = std::vector<HistoryStoreOffer>;

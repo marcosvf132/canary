@@ -5835,7 +5835,7 @@ bool Game::combatChangeHealth(Creature* attacker, Creature* target, CombatDamage
 
 		// Using real damage
 		if (attackerPlayer) {
-			//life leech
+			// life leech
 			uint16_t lifeChance = attackerPlayer->getSkillLevel(SKILL_LIFE_LEECH_CHANCE);
 			uint16_t lifeSkill = attackerPlayer->getSkillLevel(SKILL_LIFE_LEECH_AMOUNT);
 			if (normal_random(0, 100) < lifeChance) {
@@ -5859,9 +5859,9 @@ bool Game::combatChangeHealth(Creature* attacker, Creature* target, CombatDamage
 				Combat::doCombatHealth(nullptr, attackerPlayer, tmpDamage, tmpParams);
 			}
 
-			//mana leech
+			// mana leech
 			uint16_t manaChance = attackerPlayer->getSkillLevel(SKILL_MANA_LEECH_CHANCE);
-      		uint16_t manaSkill = attackerPlayer->getSkillLevel(SKILL_MANA_LEECH_AMOUNT);
+			uint16_t manaSkill = attackerPlayer->getSkillLevel(SKILL_MANA_LEECH_AMOUNT);
 			if (normal_random(0, 100) < manaChance) {
 				// Void charm rune
 				if (targetMonster) {
@@ -6949,8 +6949,7 @@ void Game::kickPlayer(uint32_t playerId, bool displayEffect) {
 	player->removePlayer(displayEffect);
 }
 
-void Game::playerCyclopediaCharacterInfo(uint32_t playerId, uint32_t characterId, CyclopediaCharacterInfoType_t type, uint16_t itemsPerPage, uint16_t requestedPage)
-{
+void Game::playerCyclopediaCharacterInfo(uint32_t playerId, uint32_t characterId, CyclopediaCharacterInfoType_t type, uint16_t itemsPerPage, uint16_t requestedPage) {
 	Player* player = getPlayerByID(playerId);
 	if (!player) {
 		return;
@@ -6980,18 +6979,18 @@ void Game::playerCyclopediaCharacterInfo(uint32_t playerId, uint32_t characterId
 			if (achievement.secret) {
 				secretAchievementsUnlocked++;
 			}
-			achievementsUnlocked.push_back({achievement, achievementUnlocked.second});
+			achievementsUnlocked.push_back({ achievement, achievementUnlocked.second });
 		}
 		player->sendCyclopediaCharacterAchievements(secretAchievementsUnlocked, achievementsUnlocked);
 	} else if (type == CYCLOPEDIA_CHARACTERINFO_ITEMSUMMARY) {
-		player->sendCyclopediaCharacterItemSummary(player->getInventoryItemsId(), player->getStoreInboxItemsId(), player->getStashItems(),
-													player->getDepotItemsIds(), player->getInboxItemsIds());
+		player->sendCyclopediaCharacterItemSummary(player->getInventoryItemsId(), player->getStoreInboxItemsId(), player->getStashItems(), player->getDepotItemsIds(), player->getInboxItemsIds());
 	} else if (type == CYCLOPEDIA_CHARACTERINFO_OUTFITSMOUNTS) {
 		player->sendCyclopediaCharacterOutfitsMounts();
 	} else if (type == CYCLOPEDIA_CHARACTERINFO_STORESUMMARY) {
 		player->sendCyclopediaCharacterStoreSummary();
 	} else if (type == CYCLOPEDIA_CHARACTERINFO_INSPECTION) {
-		player->sendCyclopediaCharacterInspection();;
+		player->sendCyclopediaCharacterInspection();
+		;
 	} else if (type == CYCLOPEDIA_CHARACTERINFO_BADGES) {
 		player->sendCyclopediaCharacterBadges(getPlayerBadges());
 	} else if (type == CYCLOPEDIA_CHARACTERINFO_TITLES) {
@@ -7002,8 +7001,7 @@ void Game::playerCyclopediaCharacterInfo(uint32_t playerId, uint32_t characterId
 	}
 }
 
-void Game::playerFriendSystemAction(uint32_t playerId, uint8_t type, uint8_t titleId)
-{
+void Game::playerFriendSystemAction(uint32_t playerId, uint8_t type, uint8_t titleId) {
 	Player* player = getPlayerByID(playerId);
 	if (!player) {
 		return;
@@ -8585,14 +8583,13 @@ bool Game::addItemStoreInbox(const Player* player, uint32_t itemId) {
 	return true;
 }
 
-void Game::initializeGameWorldHighscores()
-{
+void Game::initializeGameWorldHighscores() {
 	highscores.clear();
 
 	DBResult_ptr result;
 	DBResult_ptr childResult;
 	std::ostringstream query;
-	Database& db = Database::getInstance();
+	Database &db = Database::getInstance();
 
 	query << "SELECT * FROM `players`";
 	result = db.storeQuery(query.str());
@@ -8634,28 +8631,60 @@ void Game::initializeGameWorldHighscores()
 			characterPoints = 0;
 			if (player) {
 				switch (static_cast<HighscoreCategories_t>(i)) {
-					case HIGHSCORE_CATEGORY_FIST_FIGHTING: characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_FIST)); break;
-					case HIGHSCORE_CATEGORY_CLUB_FIGHTING: characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_CLUB)); break;
-					case HIGHSCORE_CATEGORY_SWORD_FIGHTING: characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_SWORD)); break;
-					case HIGHSCORE_CATEGORY_AXE_FIGHTING: characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_AXE)); break;
-					case HIGHSCORE_CATEGORY_DISTANCE_FIGHTING: characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_DISTANCE)); break;
-					case HIGHSCORE_CATEGORY_SHIELDING: characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_SHIELD)); break;
-					case HIGHSCORE_CATEGORY_FISHING: characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_FISHING)); break;
-					case HIGHSCORE_CATEGORY_MAGIC_LEVEL: characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_MAGLEVEL)); break;
+					case HIGHSCORE_CATEGORY_FIST_FIGHTING:
+						characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_FIST));
+						break;
+					case HIGHSCORE_CATEGORY_CLUB_FIGHTING:
+						characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_CLUB));
+						break;
+					case HIGHSCORE_CATEGORY_SWORD_FIGHTING:
+						characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_SWORD));
+						break;
+					case HIGHSCORE_CATEGORY_AXE_FIGHTING:
+						characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_AXE));
+						break;
+					case HIGHSCORE_CATEGORY_DISTANCE_FIGHTING:
+						characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_DISTANCE));
+						break;
+					case HIGHSCORE_CATEGORY_SHIELDING:
+						characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_SHIELD));
+						break;
+					case HIGHSCORE_CATEGORY_FISHING:
+						characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_FISHING));
+						break;
+					case HIGHSCORE_CATEGORY_MAGIC_LEVEL:
+						characterPoints = static_cast<uint64_t>(player->getSkillLevel(SKILL_MAGLEVEL));
+						break;
 					default: {
 						characterPoints = player->getExperience();
 					}
 				}
 			} else {
 				switch (static_cast<HighscoreCategories_t>(i)) {
-					case HIGHSCORE_CATEGORY_FIST_FIGHTING: characterPoints = result->getNumber<uint64_t>("skill_fist"); break;
-					case HIGHSCORE_CATEGORY_CLUB_FIGHTING: characterPoints = result->getNumber<uint64_t>("skill_club"); break;
-					case HIGHSCORE_CATEGORY_SWORD_FIGHTING: characterPoints = result->getNumber<uint64_t>("skill_sword"); break;
-					case HIGHSCORE_CATEGORY_AXE_FIGHTING: characterPoints = result->getNumber<uint64_t>("skill_axe"); break;
-					case HIGHSCORE_CATEGORY_DISTANCE_FIGHTING: characterPoints = result->getNumber<uint64_t>("skill_dist"); break;
-					case HIGHSCORE_CATEGORY_SHIELDING: characterPoints = result->getNumber<uint64_t>("skill_shielding"); break;
-					case HIGHSCORE_CATEGORY_FISHING: characterPoints = result->getNumber<uint64_t>("skill_fishing"); break;
-					case HIGHSCORE_CATEGORY_MAGIC_LEVEL: characterPoints = result->getNumber<uint64_t>("maglevel"); break;
+					case HIGHSCORE_CATEGORY_FIST_FIGHTING:
+						characterPoints = result->getNumber<uint64_t>("skill_fist");
+						break;
+					case HIGHSCORE_CATEGORY_CLUB_FIGHTING:
+						characterPoints = result->getNumber<uint64_t>("skill_club");
+						break;
+					case HIGHSCORE_CATEGORY_SWORD_FIGHTING:
+						characterPoints = result->getNumber<uint64_t>("skill_sword");
+						break;
+					case HIGHSCORE_CATEGORY_AXE_FIGHTING:
+						characterPoints = result->getNumber<uint64_t>("skill_axe");
+						break;
+					case HIGHSCORE_CATEGORY_DISTANCE_FIGHTING:
+						characterPoints = result->getNumber<uint64_t>("skill_dist");
+						break;
+					case HIGHSCORE_CATEGORY_SHIELDING:
+						characterPoints = result->getNumber<uint64_t>("skill_shielding");
+						break;
+					case HIGHSCORE_CATEGORY_FISHING:
+						characterPoints = result->getNumber<uint64_t>("skill_fishing");
+						break;
+					case HIGHSCORE_CATEGORY_MAGIC_LEVEL:
+						characterPoints = result->getNumber<uint64_t>("maglevel");
+						break;
 					default: {
 						i = HIGHSCORE_CATEGORY_EXPERIENCE;
 						characterPoints = result->getNumber<uint64_t>("experience");
@@ -8674,24 +8703,40 @@ void Game::initializeGameWorldHighscores()
 			characterPoints = 0;
 			if (player) {
 				switch (static_cast<HighscoreCategories_t>(i)) {
-					case HIGHSCORE_CATEGORY_ACHIEVEMENTS: characterPoints = static_cast<uint64_t>(player->getAchievementsPoints()); break;
-					case HIGHSCORE_CATEGORY_CHARMS: characterPoints = static_cast<uint64_t>(player->getCharmsPointsObtained()); break;
-					case HIGHSCORE_CATEGORY_DROME: characterPoints = static_cast<uint64_t>(player->getDromePointsObtained()); break;
-					case HIGHSCORE_CATEGORY_GOSHNAR: characterPoints = static_cast<uint64_t>(player->getGoshnarTaintsObtained()); break;
+					case HIGHSCORE_CATEGORY_ACHIEVEMENTS:
+						characterPoints = static_cast<uint64_t>(player->getAchievementsPoints());
+						break;
+					case HIGHSCORE_CATEGORY_CHARMS:
+						characterPoints = static_cast<uint64_t>(player->getCharmsPointsObtained());
+						break;
+					case HIGHSCORE_CATEGORY_DROME:
+						characterPoints = static_cast<uint64_t>(player->getDromePointsObtained());
+						break;
+					case HIGHSCORE_CATEGORY_GOSHNAR:
+						characterPoints = static_cast<uint64_t>(player->getGoshnarTaintsObtained());
+						break;
 					default: {
 						break;
 					}
 				}
 			} else {
 				query.str(std::string());
-				query <<  "SELECT * FROM `player_summary` WHERE `player_id`=" << characterId;
+				query << "SELECT * FROM `player_summary` WHERE `player_id`=" << characterId;
 				if (childResult = db.storeQuery(query.str())) {
 					titleId = static_cast<uint8_t>(childResult->getNumber<uint16_t>("title"));
 					switch (static_cast<HighscoreCategories_t>(i)) {
-						case HIGHSCORE_CATEGORY_ACHIEVEMENTS: characterPoints = childResult->getNumber<uint64_t>("achievements_points"); break;
-						case HIGHSCORE_CATEGORY_CHARMS: characterPoints = childResult->getNumber<uint64_t>("charms"); break;
-						case HIGHSCORE_CATEGORY_DROME: characterPoints = childResult->getNumber<uint64_t>("drome"); break;
-						case HIGHSCORE_CATEGORY_GOSHNAR: characterPoints = childResult->getNumber<uint64_t>("goshnar"); break;
+						case HIGHSCORE_CATEGORY_ACHIEVEMENTS:
+							characterPoints = childResult->getNumber<uint64_t>("achievements_points");
+							break;
+						case HIGHSCORE_CATEGORY_CHARMS:
+							characterPoints = childResult->getNumber<uint64_t>("charms");
+							break;
+						case HIGHSCORE_CATEGORY_DROME:
+							characterPoints = childResult->getNumber<uint64_t>("drome");
+							break;
+						case HIGHSCORE_CATEGORY_GOSHNAR:
+							characterPoints = childResult->getNumber<uint64_t>("goshnar");
+							break;
 						default: {
 							break;
 						}
@@ -8709,7 +8754,7 @@ void Game::initializeGameWorldHighscores()
 			characterPoints = static_cast<uint64_t>(player->getLoyaltyPoints());
 		} else {
 			query.str(std::string());
-			query <<  "SELECT `creation` FROM `accounts` WHERE `id`=" << result->getNumber<uint32_t>("account_id");
+			query << "SELECT `creation` FROM `accounts` WHERE `id`=" << result->getNumber<uint32_t>("account_id");
 			if (childResult = db.storeQuery(query.str())) {
 				time_t creation = childResult->getNumber<time_t>("creation");
 				characterPoints = creation == 0 ? 0 : static_cast<uint64_t>(std::ceil((static_cast<double>(time(nullptr) - creation)) / 86400));

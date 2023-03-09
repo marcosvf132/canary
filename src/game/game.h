@@ -349,11 +349,11 @@ class Game {
 		void playerCreateMarketOffer(uint32_t playerId, uint8_t type, uint16_t itemId, uint16_t amount, uint64_t price, uint8_t tier, bool anonymous);
 		void playerCancelMarketOffer(uint32_t playerId, uint32_t timestamp, uint16_t counter);
 		void playerAcceptMarketOffer(uint32_t playerId, uint32_t timestamp, uint16_t counter, uint16_t amount);
-//		void playerStoreOpen(uint32_t playerId, uint8_t serviceType);
-//		void playerShowStoreCategoryOffers(uint32_t playerId, StoreCategory* category);
-//		void playerBuyStoreOffer(uint32_t playerId, uint32_t offerId, uint8_t productType, const std::string& additionalInfo="");
-//		void playerCoinTransfer(uint32_t playerId, const std::string& receiverName, uint32_t amount);
-//		void playerStoreTransactionHistory(uint32_t playerId, uint32_t page);
+		//		void playerStoreOpen(uint32_t playerId, uint8_t serviceType);
+		//		void playerShowStoreCategoryOffers(uint32_t playerId, StoreCategory* category);
+		//		void playerBuyStoreOffer(uint32_t playerId, uint32_t offerId, uint8_t productType, const std::string& additionalInfo="");
+		//		void playerCoinTransfer(uint32_t playerId, const std::string& receiverName, uint32_t amount);
+		//		void playerStoreTransactionHistory(uint32_t playerId, uint32_t page);
 		void playerCyclopediaCharacterInfo(uint32_t playerId, uint32_t characterId, CyclopediaCharacterInfoType_t type, uint16_t itemsPerPage, uint16_t requestedPage);
 
 		void parsePlayerExtendedOpcode(uint32_t playerId, uint8_t opcode, const std::string &buffer);
@@ -586,7 +586,7 @@ class Game {
 			uint16_t id = 0;
 			auto it = std::find_if(achievementsNameToId.begin(), achievementsNameToId.end(), [name](auto it) {
 				return it.first == name;
-				});
+			});
 
 			if (it != achievementsNameToId.end()) {
 				id = (*it).second;
