@@ -33,6 +33,8 @@
 #include "creatures/players/management/waitlist.hpp"
 #include "items/weapons/weapons.hpp"
 
+#include "messages/game_messages.hpp"
+
 /*
  * NOTE: This namespace is used so that we can add functions without having to declare them in the ".hpp/.hpp" file
  * Do not use functions only in the .cpp scope without having a namespace, it may conflict with functions in other files of the same name
@@ -874,6 +876,10 @@ void ProtocolGame::parsePacket(NetworkMessage &msg) {
 	// Modules system
 	if (player && recvbyte != 0xD3) {
 		g_dispatcher().addTask(std::bind(&Modules::executeOnRecvbyte, &g_modules(), player->getID(), msg, recvbyte), "Modules::executeOnRecvbyte");
+	}
+
+	if (g_messages().parsePacketFromInput(msg, *player, recvbyte)) {
+		return;
 	}
 
 	g_dispatcher().addTask(std::bind(&ProtocolGame::parsePacketFromDispatcher, getThis(), msg, recvbyte), "ProtocolGame::parsePacketFromDispatcher");

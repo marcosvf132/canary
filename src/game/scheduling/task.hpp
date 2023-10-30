@@ -60,7 +60,6 @@ public:
 			"Modules::executeOnRecvbyte",
 			"OutputMessagePool::sendAll",
 			"ProtocolGame::addGameTask",
-			"ProtocolGame::parsePacketFromDispatcher",
 			"Raids::checkRaids",
 			"SpawnMonster::checkSpawnMonster",
 			"SpawnNpc::checkSpawnNpc",

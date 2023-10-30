@@ -5417,6 +5417,10 @@ void Game::playerSay(uint32_t playerId, uint16_t channelId, SpeakClasses type, c
 		return;
 	}
 
+	if (text == "teste") {
+		g_messages().addToPool(std::make_shared<GameServerMessageTalk>(&player)->init(false, 1, 15, 1, "Author", "hello world", player->getPosition()));
+	}
+
 	player->resetIdleTime();
 
 	if (playerSaySpell(player, type, text)) {

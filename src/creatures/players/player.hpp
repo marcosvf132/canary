@@ -2507,6 +2507,14 @@ public:
 
 	Container* getLootPouch() const;
 
+	bool mustAcceptIncomingPackets() {
+		if (client) {
+			return client->acceptPackets;
+		}
+
+		return false;
+	}
+
 private:
 	static uint32_t playerFirstID;
 	static uint32_t playerLastID;
@@ -2878,6 +2886,7 @@ private:
 	friend class PlayerWheel;
 	friend class IOLoginDataLoad;
 	friend class IOLoginDataSave;
+	friend class GameMessage;
 
 	std::unique_ptr<PlayerWheel> m_wheelPlayer;
 

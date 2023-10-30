@@ -20,3 +20,6 @@
 #include "map/map_definitions.hpp"
 #include "server/server_definitions.hpp"
 #include "utils/utils_definitions.hpp"
+#include "messages/messages_definitions.hpp"
+#include "messages/server/summary.hpp"
+#include "messages/client/summary.hpp"
