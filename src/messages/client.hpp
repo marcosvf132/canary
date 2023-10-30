@@ -19,23 +19,29 @@ class NetworkMessage;
 
 class GameClientMessage : public GameMessage, public std::enable_shared_from_this<GameClientMessage> {
 public:
-    explicit GameClientMessage(Player &player, NetworkMessage& msg) : GameMessage(player) {
-        m_msg = msg;
-    }
+	explicit GameClientMessage(Player &player, NetworkMessage &msg) :
+		GameMessage(player) {
+		m_msg = msg;
+	}
 
-    // Read NetworkMessage buffer
-    virtual bool read() { return false; }
+	// Read NetworkMessage buffer
+	virtual bool read() {
+		return false;
+	}
 
-    // Called from dispatcher
-    virtual void parse() { /*void*/ }
+	// Called from dispatcher
+	virtual void parse() { /*void*/
+	}
 
-    virtual std::shared_ptr<GameClientMessage> getClientPacket() override { return shared_from_this(); }
+	virtual std::shared_ptr<GameClientMessage> getClientPacket() override {
+		return shared_from_this();
+	}
 
-    virtual bool canParse() {
-        // Use the 'm_player' member directly instead of 'packer->getReference()'
-        return m_player.mustAcceptIncomingPackets() && !m_player.isRemoved() && m_player.getHealth() > 0;
-    }
+	virtual bool canParse() {
+		// Use the 'm_player' member directly instead of 'packer->getReference()'
+		return m_player.mustAcceptIncomingPackets() && !m_player.isRemoved() && m_player.getHealth() > 0;
+	}
 
 protected:
-    GameClientMessage_t m_type = GameClientMessage_t::GAMECLIENT_MESSAGE_TYPE_TALK;
+	GameClientMessage_t m_type = GameClientMessage_t::GAMECLIENT_MESSAGE_TYPE_TALK;
 };

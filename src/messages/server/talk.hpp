@@ -17,7 +17,8 @@ class NetworkMessage;
 
 class GameServerMessageTalk : public GameServerMessage {
 public:
-    explicit GameServerMessageTalk(Player &player) : GameServerMessage(player) {
+	explicit GameServerMessageTalk(Player &player) :
+		GameServerMessage(player) {
 		// Message header type
 		m_type = GameServerMessage_t::GAMESERVER_MESSAGE_TYPE_TALK;
 
@@ -25,8 +26,8 @@ public:
 		m_unique = false;
 
 		// Used for debug only
-        m_name = "Talk";
-    }
+		m_name = "Talk";
+	}
 
 	std::shared_ptr<GameServerMessage> init(bool traded, uint8_t type, uint16_t level, uint32_t statement, std::string author, std::string text, Position pos) {
 		l_traded = traded;
@@ -38,8 +39,8 @@ public:
 		l_text = std::move(text);
 		return shared_from_this();
 	}
- 
-    virtual bool write() {
+
+	virtual bool write() {
 		m_msg.add<uint32_t>(l_statement);
 		m_msg.addString(l_author);
 		m_msg.addByte(l_traded ? 1 : 0);

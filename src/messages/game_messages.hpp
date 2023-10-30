@@ -22,25 +22,25 @@ class GameMessages {
 public:
 	GameMessages() { }
 
-    // Ensures that we don't accidentally copy it
-    GameMessages(const GameMessages &) = delete;
-    GameMessages operator=(const GameMessages &) = delete;
-    static GameMessages &getInstance();
+	// Ensures that we don't accidentally copy it
+	GameMessages(const GameMessages &) = delete;
+	GameMessages operator=(const GameMessages &) = delete;
+	static GameMessages &getInstance();
 
 	void addToPool(std::shared_ptr<GameMessage> packet);
 	void abort(GameServerMessage_t type, uint32_t playerId);
-    bool parsePacketFromInput(NetworkMessage& msg, Player &player, uint8_t header);
+	bool parsePacketFromInput(NetworkMessage &msg, Player &player, uint8_t header);
 
 private:
-    void serverCycle();
-    void clientCycle();
+	void serverCycle();
+	void clientCycle();
 
-    PacketsPool m_server;
-    PacketsPool m_client;
+	PacketsPool m_server;
+	PacketsPool m_client;
 
-    // Make it thread safe since client packets initially comes from protocol thread
-    std::mutex m_serverThreadSafe;
-    std::mutex m_clientThreadSafe;
+	// Make it thread safe since client packets initially comes from protocol thread
+	std::mutex m_serverThreadSafe;
+	std::mutex m_clientThreadSafe;
 };
 
 constexpr auto g_messages = GameMessages::getInstance;

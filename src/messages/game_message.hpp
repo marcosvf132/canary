@@ -19,19 +19,32 @@ class Player;
 
 class GameMessage {
 public:
-	explicit GameMessage(Player &player) : m_player(player), m_name("Unknown") {}
+	explicit GameMessage(Player &player) :
+		m_player(player), m_name("Unknown") { }
 
-	uint32_t getIdentifier() const { return m_player.getGUID(); }
+	uint32_t getIdentifier() const {
+		return m_player.getGUID();
+	}
 
-	const Player& getReference() const { return m_player; }
+	const Player &getReference() const {
+		return m_player;
+	}
 
-	NetworkMessage& getMessage() { return m_msg; }
+	NetworkMessage &getMessage() {
+		return m_msg;
+	}
 
-	virtual std::shared_ptr<GameServerMessage> getServerPacket() { return nullptr; }
+	virtual std::shared_ptr<GameServerMessage> getServerPacket() {
+		return nullptr;
+	}
 
-	virtual std::shared_ptr<GameClientMessage> getClientPacket() { return nullptr; }
+	virtual std::shared_ptr<GameClientMessage> getClientPacket() {
+		return nullptr;
+	}
 
-	const std::string& getName() const { return m_name; }
+	const std::string &getName() const {
+		return m_name;
+	}
 
 protected:
 	NetworkMessage m_msg;
